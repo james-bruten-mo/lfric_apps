@@ -22,6 +22,8 @@
         "site_validator",
         "validate_rose_meta",
         "rose-stem_lint_checker",
+        "global_variables_checker",
+        "python_unit_tests",
     ],
     "gungho": [
         "gungho_unit_tests_spice_intel_64bit",

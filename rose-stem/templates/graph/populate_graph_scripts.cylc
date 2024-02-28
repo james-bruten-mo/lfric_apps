@@ -45,10 +45,6 @@
             lfric_atm.build_task,
             task
             ]) %}
-        {% do graph_sections.append([
-            export_task,
-            "test_extract_checker"
-            ]) %}
     {% endif %}
 
 {% else %}
@@ -58,6 +54,8 @@
     {# * site_validator #}
     {# * rose-stem_lint_checker #}
     {# * validate_rose_meta #}
+    {# * global_variables_checker #}
+    {# * python_unit_tests #}
 
     {% do graph_sections.append([
         export_task,
