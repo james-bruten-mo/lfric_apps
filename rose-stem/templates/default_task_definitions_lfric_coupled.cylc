@@ -58,12 +58,12 @@
 
 {# Caution: This default assumes running at the MO #}
 {% if "nemo_start" not in task_dict %}
-    {% do task_dict.update({"nemo_start": "/data/d03/lfric/data/start_dumps/basic-gc/Tamaraw/19790101/cf652o_19790101_restart.nc"}) %}
+    {% do task_dict.update({"nemo_start": "$BIG_DATA_DIR/start_dumps/basic-gc/Tamaraw/19790101/cf652o_19790101_restart.nc"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}
 {% if "nemo_icebergs_start" not in task_dict %}
-    {% do task_dict.update({"nemo_icebergs_start": "/data/d03/lfric/data/start_dumps/basic-gc/Tamaraw/19790101/cd986o_icebergs_19781201_restart.nc"}) %}
+    {% do task_dict.update({"nemo_icebergs_start": "$BIG_DATA_DIR/start_dumps/basic-gc/Tamaraw/19790101/cd986o_icebergs_19781201_restart.nc"}) %}
 {% endif %}
 
 {% if "nemo_version" not in task_dict %}
@@ -112,7 +112,7 @@
 
 {# Caution: This default assumes running at the MO #}
 {% if "rivers_only_install_dir" not in task_dict %}
-    {% do task_dict.update({"rivers_only_install_dir": "/data/d03/lfric/data/ancils/basic-gc/Ticket2861/C48/n96e/orca025/rivers_trip/rivers_grid"}) %}
+    {% do task_dict.update({"rivers_only_install_dir": "$BIG_DATA_DIR/ancils/basic-gc/Ticket2861/C48/n96e/orca025/rivers_trip/rivers_grid"}) %}
 {% endif %}
 
 {% if "river_nodes" not in task_dict %}
@@ -136,12 +136,12 @@
 
 {# Caution: This default assumes running at the MO #}
 {% if "riv_number_ancillary" not in task_dict %}
-    {% do task_dict.update({"riv_number_ancillary": "/data/d03/lfric/data/ancils/basic-gc/Ticket2861/C48/n96e/orca025/rivers_trip/sequence/etopo5"}) %}
+    {% do task_dict.update({"riv_number_ancillary": "$BIG_DATA_DIR/ancils/basic-gc/Ticket2861/C48/n96e/orca025/rivers_trip/sequence/etopo5"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}
 {% if "si3_start" not in task_dict %}
-    {% do task_dict.update({"si3_start": "/data/d03/lfric/data/start_dumps/basic-gc/Tamaraw/19790101/cf652o_19790101_restart_ice.nc"}) %}
+    {% do task_dict.update({"si3_start": "$BIG_DATA_DIR/start_dumps/basic-gc/Tamaraw/19790101/cf652o_19790101_restart_ice.nc"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}

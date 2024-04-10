@@ -20,10 +20,10 @@ TLK_SOURCES    := $(shell find $(PSYAD_WDIR)/kernel -name 'tl_*_kernel_mod.[Ff]9
 REGK_SOURCES   := $(filter-out $(TLK_SOURCES), $(KERNEL_SOURCES))
 
 # tl kernel files
-TLK_ADJ_TARGETS := $(subst tl,adj,$(TLK_SOURCES))
+TLK_ADJ_TARGETS := $(subst tl_,adj_,$(TLK_SOURCES))
 
 # And their corresponding adjoint test names
-TLK_ADJT_TARGETS := $(subst tl,adjt,$(TLK_SOURCES))
+TLK_ADJT_TARGETS := $(subst tl_,adjt_,$(TLK_SOURCES))
 TLK_ADJT_TARGETS := $(subst kernel_mod,alg_mod,$(TLK_ADJT_TARGETS))
 TLK_ADJT_TARGETS := $(subst .F90,.X90,$(TLK_ADJT_TARGETS))
 TLK_ADJT_TARGETS := $(subst .f90,.x90,$(TLK_ADJT_TARGETS))
@@ -64,7 +64,7 @@ $(PSYAD_WDIR)/$1/adj_%_kernel_mod.F90 $(PSYAD_WDIR)/$2/adjt_%_alg_mod.X90: \
 
 	# Generating ADJT_TARGET since Make does not
 	# allow one to get it from the target list.
-	$$(eval ADJT_TARGET := $$(subst tl,adjt,$$<))
+	$$(eval ADJT_TARGET := $$(subst tl_,adjt_,$$<))
 	$$(eval ADJT_TARGET := $$(subst kernel_mod,alg_mod,$$(ADJT_TARGET)))
 	$$(eval ADJT_TARGET := $$(subst .F90,.X90,$$(ADJT_TARGET)))
 	$$(eval ADJT_TARGET := $$(subst $$(PSYAD_WDIR)/kernel,$$(PSYAD_WDIR)/algorithm,$$(ADJT_TARGET)))
@@ -107,7 +107,7 @@ $(PSYAD_WDIR)/$1/adj_%_kernel_mod.f90 $(PSYAD_WDIR)/$2/adjt_%_alg_mod.x90: \
 
 	# Generating ADJT_TARGET since Make does not
 	# allow one to get it from the target list.
-	$$(eval ADJT_TARGET := $$(subst tl,adjt,$$<))
+	$$(eval ADJT_TARGET := $$(subst tl_,adjt_,$$<))
 	$$(eval ADJT_TARGET := $$(subst kernel_mod,alg_mod,$$(ADJT_TARGET)))
 	$$(eval ADJT_TARGET := $$(subst .f90,.x90,$$(ADJT_TARGET)))
 	$$(eval ADJT_TARGET := $$(subst $$(PSYAD_WDIR)/kernel,$$(PSYAD_WDIR)/algorithm,$$(ADJT_TARGET)))
