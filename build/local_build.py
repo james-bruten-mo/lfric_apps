@@ -44,11 +44,7 @@ def get_root_path():
     Get the root path of the current working copy
     """
 
-    command = 'svn info . |grep -F "Working Copy Root Path:"'
-    result = subprocess.run(
-        command, shell=True, capture_output=True, text=True, check=True
-    )
-    return result.stdout.split()[-1]
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def determine_core_source(root_dir):
