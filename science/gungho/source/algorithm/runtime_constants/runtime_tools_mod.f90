@@ -19,8 +19,7 @@
 module runtime_tools_mod
 
   use constants_mod,     only: i_def, str_def
-  use field_r32_mod,     only: field_r32_type
-  use field_r64_mod,     only: field_r64_type
+  use field_parent_mod,  only: field_parent_type
   use field_mod,         only: field_type
   use r_tran_field_mod,  only: r_tran_field_type
   use integer_field_mod, only: integer_field_type
@@ -55,12 +54,6 @@ module runtime_tools_mod
   public :: get_hierarchical_mesh_id
   public :: check_initialised_field
   public :: check_initialised_operator
-
-  interface check_initialised_field
-     procedure check_initialised_field_r32,   &
-               check_initialised_field_integer, &
-               check_initialised_field_r64
-  end interface check_initialised_field
 
 contains
   !> @brief Subroutine to initialise mesh ID list
@@ -160,9 +153,9 @@ contains
   !> @param[in] field_name A name of the field to include in the error message
   !> @param[in] mesh_id    ID of the mesh
   !> @param[in] space      An optional integer representing the function space
-  subroutine check_initialised_field_r32(field, field_name, mesh_id, space)
+  subroutine check_initialised_field(field, field_name, mesh_id, space)
     implicit none
-    type(field_r32_type),          intent(in) :: field
+    class(field_parent_type),      intent(in) :: field
     character(str_def),            intent(in) :: field_name
     integer(kind=i_def),           intent(in) :: mesh_id
     integer(kind=i_def), optional, intent(in) :: space
@@ -178,57 +171,7 @@ contains
       call log_event(log_scratch_space, LOG_LEVEL_ERROR)
     end if
 
-  end subroutine check_initialised_field_r32
-
-  !> @brief Checks whether a field is initialised and returns an error if not
-  !> @param[in] field      The field to check
-  !> @param[in] field_name A name of the field to include in the error message
-  !> @param[in] mesh_id    ID of the mesh
-  !> @param[in] space      An optional integer representing the function space
-  subroutine check_initialised_field_r64(field, field_name, mesh_id, space)
-    implicit none
-    type(field_r64_type),          intent(in) :: field
-    character(str_def),            intent(in) :: field_name
-    integer(kind=i_def),           intent(in) :: mesh_id
-    integer(kind=i_def), optional, intent(in) :: space
-
-    if (.not. field%is_initialised()) then
-      if (present(space)) then
-        write(log_scratch_space, '(A,A,I3,A,A)') &
-        trim(field_name), ' on mesh ', mesh_id, ' not initialised for ', find_space_name(space)
-      else
-        write(log_scratch_space, '(A,A,I3,A)') &
-        trim(field_name), ' on mesh ', mesh_id, ' not initialised'
-      end if
-      call log_event(log_scratch_space, LOG_LEVEL_ERROR)
-    end if
-
-  end subroutine check_initialised_field_r64
-
-  !> @brief Checks whether a field is initialised and returns an error if not
-  !> @param[in] field      The field to check
-  !> @param[in] field_name A name of the field to include in the error message
-  !> @param[in] mesh_id    ID of the mesh
-  !> @param[in] space      An optional integer representing the function space
-  subroutine check_initialised_field_integer(field, field_name, mesh_id, space)
-    implicit none
-    type(integer_field_type),       intent(in) :: field
-    character(str_def),            intent(in) :: field_name
-    integer(kind=i_def),           intent(in) :: mesh_id
-    integer(kind=i_def), optional, intent(in) :: space
-
-    if (.not. field%is_initialised()) then
-      if (present(space)) then
-        write(log_scratch_space, '(A,A,I3,A,A)') &
-        trim(field_name), ' on mesh ', mesh_id, ' not initialised for ', find_space_name(space)
-      else
-        write(log_scratch_space, '(A,A,I3,A)') &
-        trim(field_name), ' on mesh ', mesh_id, ' not initialised'
-      end if
-      call log_event(log_scratch_space, LOG_LEVEL_ERROR)
-    end if
-
-  end subroutine check_initialised_field_integer
+  end subroutine check_initialised_field
 
   !> @brief Checks whether an operator is initialised and returns an error if not
   !> @param[in] operator      The operator to check

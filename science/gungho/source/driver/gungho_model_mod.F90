@@ -972,12 +972,6 @@ contains
       call prognostic_fields%get_field('rho', rho)
       call prognostic_fields%get_field('exner', exner)
 
-      ! Log fields
-      call rho%log_field(   LOG_LEVEL_TRACE, 'rho' )
-      call theta%log_field( LOG_LEVEL_TRACE, 'theta' )
-      call exner%log_field( LOG_LEVEL_TRACE, 'exner' )
-      call u%log_field(     LOG_LEVEL_TRACE, 'u' )
-
       ! Write checksums to file
       if (use_moisture) then
         call checksum_alg(program_name, rho, 'rho', theta, 'theta', u, 'u', &
