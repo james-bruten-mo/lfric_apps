@@ -179,19 +179,19 @@ def parse_cl_args():
 
     # Don't allow use of runN as this symlink doesn't exist on remote platforms
     # If runN or no run provided, read the runN symlink to work out actual num
-    try:
-        path_base = args.suite.split("/")[-1]
-    except IndexError:
-        path_base = args.suite
+    path_base = args.suite.split("/")
+    if len(path_base) > 1:
+        path_base = path_base[-1]
+    else:
+        path_base = ""
     if path_base == "runN":
         args.suite = args.suite.removesuffix("runN")
         path_base = ""
     if "run" not in path_base:
-        sym_path = run_command(
-            f"readlink {os.path.expanduser(
-                os.path.join('~', 'cylc-run', args.suite, 'runN')
-            )}"
+        spath = os.path.expanduser(
+            os.path.join('~', 'cylc-run', args.suite, 'runN')
         )
+        sym_path = run_command(f"readlink {spath}")
         args.suite = os.path.join(args.suite, sym_path.stdout.strip("\n"))
     return args
 
