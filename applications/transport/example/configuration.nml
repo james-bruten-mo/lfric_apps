@@ -131,6 +131,7 @@ profile_size=9,
 reversible=9*.false.
 runge_kutta_method='ssp3',
 scheme=9*1
+si_outer_transport='none',
 slice_order='cubic',
 splitting=9*1
 theta_dispersion_correction=.false.

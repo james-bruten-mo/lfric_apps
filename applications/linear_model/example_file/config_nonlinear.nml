@@ -244,6 +244,7 @@ profile_size=5
 reversible=.false.,.false.,.false.,.false.,.false.
 runge_kutta_method='ssp4'
 scheme=1,1,1,1,1
+si_outer_transport='none',
 slice_order='cubic'
 splitting=1,1,1,1,1
 theta_dispersion_correction=.false.

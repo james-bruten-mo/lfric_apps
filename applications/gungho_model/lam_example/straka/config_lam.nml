@@ -238,6 +238,7 @@ oned_reconstruction = .false.
 operators = 'fv'
 vertical_sl_order='cubic'
 slice_order='cubic'
+si_outer_transport='none'
 runge_kutta_method = 'ssp5'
 ffsl_advective_splitting='full'
 ffsl_flux_splitting='full'

@@ -198,6 +198,7 @@ contains
     logical(kind=l_def)                   :: enforce_min_value
     logical(kind=l_def)                   :: final_split_step
     logical(kind=l_def)                   :: is_dry_field
+    logical(kind=l_def)                   :: no_mono_flag
     real(kind=r_tran)                     :: min_value
     real(kind=r_tran)                     :: adv_dt
     real(kind=r_tran)                     :: acceptable_min
@@ -209,6 +210,7 @@ contains
     ! Extract transport runtime
     mesh => field_np1%get_mesh()
     transport_runtime => get_transport_runtime(mesh)
+    no_mono_flag = transport_runtime%get_no_mono_flag()
     mesh_id = mesh%get_id()
     enforce_min_value = transport_metadata%get_enforce_min_value()
     is_dry_field = (trim(transport_metadata%get_name()) == trim(dry_field_name))
@@ -240,7 +242,8 @@ contains
       ! Conservative clipping by limiting flux, if specified
       ! ---------------------------------------------------------------------- !
 
-      if (enforce_min_value .and. min_val_method == min_val_method_iterative) then
+      if (enforce_min_value .and. min_val_method == min_val_method_iterative &
+                            .and. .not. no_mono_flag) then
 
         if ( subroutine_timers ) call timer('transport.iterative_min_val')
 
@@ -294,7 +297,7 @@ contains
 
       ! Limiter doesn't guarantee positivity, so mop up here
       if (enforce_min_value) then
-        if (min_val_method == min_val_method_clipping) then
+        if (min_val_method == min_val_method_clipping .or. no_mono_flag) then
           min_value = transport_metadata%get_min_value()
           call invoke( inc_max_aX(min_value, field_np1) )
         else
@@ -504,6 +507,7 @@ contains
     logical(kind=l_def)                   :: enforce_min_value
     logical(kind=l_def)                   :: final_split_step
     logical(kind=l_def)                   :: logspace
+    logical(kind=l_def)                   :: no_mono_flag
     real(kind=r_tran)                     :: min_value
     real(kind=r_tran)                     :: adv_dt
     real(kind=r_tran)                     :: acceptable_min
@@ -515,6 +519,7 @@ contains
     ! Extract transport runtime
     prime_extrusion_mesh => field_np1%get_mesh()
     transport_runtime => get_transport_runtime(prime_extrusion_mesh)
+    no_mono_flag = transport_runtime%get_no_mono_flag()
     prime_extrusion_mesh_id = prime_extrusion_mesh%get_id()
     enforce_min_value = transport_metadata%get_enforce_min_value()
     mr_function_space = field_np1%which_function_space()
@@ -665,7 +670,8 @@ contains
 
       call build_up_flux(sum_flux, flux, transport_runtime, transport_metadata)
 
-      if (enforce_min_value .and. min_val_method == min_val_method_iterative) then
+      if (enforce_min_value .and. min_val_method == min_val_method_iterative &
+                            .and. .not. no_mono_flag) then
         if ( subroutine_timers ) call timer('transport.iterative_min_val')
 
         min_value = transport_metadata%get_min_value()
@@ -738,7 +744,7 @@ contains
 
     ! Clip at end, which will also catch negative values from extrapolation at
     ! model top/bottom when converting back to Wtheta
-    if (enforce_min_value .and. final_split_step) then
+    if (enforce_min_value .and. (final_split_step .or. no_mono_flag) ) then
       min_value = transport_metadata%get_min_value()
       call invoke( inc_max_aX(min_value, field_np1) )
     end if

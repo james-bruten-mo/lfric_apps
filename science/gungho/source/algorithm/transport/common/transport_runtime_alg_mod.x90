@@ -67,6 +67,7 @@ module transport_runtime_alg_mod
                                             linear_remap
   use runtime_tools_mod,              only: check_initialised_field
   use timer_mod,                      only: timer
+  use timestepping_config_mod,        only: outer_iterations
   use transport_config_mod,           only: extended_mesh,           &
                                             special_edges_treatment, &
                                             dep_pt_stencil_extent,   &
@@ -168,6 +169,8 @@ module transport_runtime_alg_mod
     real(kind=r_tran),          allocatable, dimension(:)     :: vertical_cfl_max
     real(kind=r_tran),          allocatable, dimension(:)     :: total_cfl_max
     class(model_clock_type),    pointer                       :: model_clock
+    logical(kind=l_def)                                       :: advective_first_outer
+    logical(kind=l_def)                                       :: no_mono_first_outer
     logical(kind=l_def)                                       :: rho_monotone_remap
     logical(kind=l_def)                                       :: rho_enforce_minvalue
     real(kind=r_tran)                                         :: rho_minvalue
@@ -242,6 +245,8 @@ module transport_runtime_alg_mod
     procedure, public  :: inc_tracer_step_ctr
     procedure, public  :: reset_tracer_step_ctr
     procedure, public  :: remap_on_extended_mesh
+    procedure, public  :: get_advective_flag
+    procedure, public  :: get_no_mono_flag
     procedure, public  :: initialise => transport_runtime_initialiser
     final              :: destroy_transport_runtime
 
@@ -280,18 +285,21 @@ contains
     use compute_sl_coefficients_alg_mod, &
                                        only: compute_vert_quintic_coefficients_alg, &
                                              compute_vert_cubic_coefficients_alg
-    use ffsl_unity_transport_alg_mod,  only: ffsl_unity_transport_alg,    &
+    use ffsl_unity_transport_alg_mod,  only: ffsl_unity_transport_alg, &
                                              ffsl_unity_swift_alg
     use split_w2_field_kernel_mod,     only: split_w2_field_kernel_type
-    use transport_config_mod,          only: max_vert_cfl_calc,           &
-                                             max_vert_cfl_calc_dep_point, &
-                                             max_vert_cfl_calc_uniform,   &
-                                             horizontal_method,           &
-                                             vertical_method,             &
-                                             ffsl_unity_3d,               &
-                                             vertical_sl_order,           &
-                                             vertical_sl_order_cubic,     &
-                                             vertical_sl_order_quintic,   &
+    use transport_config_mod,          only: max_vert_cfl_calc,            &
+                                             max_vert_cfl_calc_dep_point,  &
+                                             max_vert_cfl_calc_uniform,    &
+                                             ffsl_unity_3d,                &
+                                             horizontal_method,            &
+                                             vertical_method,              &
+                                             si_outer_transport,           &
+                                             si_outer_transport_advective, &
+                                             si_outer_transport_no_mono,   &
+                                             vertical_sl_order,            &
+                                             vertical_sl_order_cubic,      &
+                                             vertical_sl_order_quintic,    &
                                              vertical_sl_order_cubic_hermite
     use map_w2_to_sh_w2_alg_mod,       only: sample_w2_to_sh_w2_alg
     use calc_max_cfl_kernel_mod,       only: calc_max_cfl_kernel_type
@@ -424,6 +432,18 @@ contains
     any_consistent_swift = check_any_consistent_swift()
     compute_cfl_dep = ((any_scheme_mol .or. log_level() <= LOG_LEVEL_INFO) &
                        .and. max_vert_cfl_calc == max_vert_cfl_calc_dep_point)
+
+    ! Set logicals for semi-implicit first outer iteration transport
+    if (outer < outer_iterations .AND. si_outer_transport==si_outer_transport_advective) then
+      self%advective_first_outer = .true.
+    else
+      self%advective_first_outer = .false.
+    end if
+    if (outer < outer_iterations .AND. si_outer_transport==si_outer_transport_no_mono) then
+      self%no_mono_first_outer = .true.
+    else
+      self%no_mono_first_outer = .false.
+    end if
 
     ! ======================================================================== !
     ! Determine number of meshes
@@ -963,7 +983,7 @@ contains
 
       !==========================================================================!
       ! Compute vertical semi-Lagrangian interpolation coefficients
-      if (any_vert_scheme_sl) then
+      if ( any_vert_scheme_sl .OR. self%advective_first_outer ) then
         ! Initialise coefficient fields with array index
         ! (mesh,function_space,coefficient_number)
         ! for the primal mesh only unless SLICE is used
@@ -990,7 +1010,8 @@ contains
             vhv_split_sl = .false.
           end if
 
-          if ( any_reversible_sl .OR. vertical_sl_order == vertical_sl_order_cubic_hermite) then
+          if ( any_reversible_sl .OR. self%advective_first_outer .OR. &
+               vertical_sl_order == vertical_sl_order_cubic_hermite ) then
             ! Compute cubic-Hermite coefficients (as part of vert_cubic_coef/index)
             hermite_sl = .true.
 
@@ -2084,8 +2105,9 @@ contains
     any_vert_dep_dist = check_vert_dep_pts()
     any_hori_dep_dist = check_horz_dep_pts()
 
-    if (any_consistent_swift .or. any_consistent_cosmic .or. &
-        (any_eqn_consistent .and. any_vert_dep_dist)) then
+    if ( ( any_consistent_swift .or. any_consistent_cosmic .or. &
+          (any_eqn_consistent .and. any_vert_dep_dist) )        &
+          .and. .not. self%advective_first_outer ) then
 
       mesh_id = mesh%get_id()
       i = self%idx_from_mesh_id(mesh_id)
@@ -3318,6 +3340,33 @@ contains
     tracer_step_ctr = self%tracer_step_ctr
 
   end function get_tracer_step_ctr
+
+  !> @brief Returns the flag to do the first outer transport advectively
+  !> @return The advective flag
+  function get_advective_flag(self) result(advective_flag)
+
+    implicit none
+
+    class(transport_runtime_type), target, intent(in) :: self
+    logical(kind=l_def) :: advective_flag
+
+    advective_flag = self%advective_first_outer
+
+  end function get_advective_flag
+
+  !> @brief Returns the flag to do the first outer transport
+  !!        without monotonicity
+  !> @return The no monotonicity flag
+  function get_no_mono_flag(self) result(no_mono_flag)
+
+    implicit none
+
+    class(transport_runtime_type), target, intent(in) :: self
+    logical(kind=l_def) :: no_mono_flag
+
+    no_mono_flag = self%no_mono_first_outer
+
+  end function get_no_mono_flag
 
 ! ============================================================================ !
 ! UTILITIES

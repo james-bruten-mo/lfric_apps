@@ -9,7 +9,7 @@
 
 module transport_field_mod
 
-  use constants_mod,                    only: r_def, r_tran, i_def
+  use constants_mod,                    only: r_def, r_tran, i_def, l_def
   use field_mod,                        only: field_type
   use r_tran_field_mod,                 only: r_tran_field_type
   use log_mod,                          only: log_event, LOG_LEVEL_ERROR
@@ -87,34 +87,53 @@ contains
     type(r_tran_field_type),       intent(in)    :: field_n
     real(kind=r_tran),             intent(in)    :: model_dt
     type(transport_metadata_type), intent(in)    :: transport_metadata
-    type(transport_runtime_type),  pointer       :: transport_runtime => null()
+
+    ! Transport runtime options
+    type(transport_runtime_type), pointer :: transport_runtime
+    type(transport_metadata_type)         :: transport_metadata_option
+    logical(kind=l_def)                   :: advective_flag
+    logical(kind=l_def)                   :: no_mono_flag
 
     ! Reset the counter for tracer transport steps and store nth level field
     transport_runtime => get_transport_runtime(field_n%get_mesh())
     call transport_runtime%reset_tracer_step_ctr()
     call transport_runtime%set_field_n(field_n)
+    ! Get advective form and no monotonicity flags
+    advective_flag = transport_runtime%get_advective_flag()
+    no_mono_flag   = transport_runtime%get_no_mono_flag()
     nullify( transport_runtime )
 
+    ! Change transport_metadata based on semi-implicit first outer transport options
+    transport_metadata_option = transport_metadata
+    if (advective_flag) then
+      ! Set advective options provided field is not density
+      if (transport_metadata_option%get_name() /= 'density') then
+        call transport_metadata_option%set_advective()
+      end if
+    else if (no_mono_flag) then
+      call transport_metadata_option%set_no_mono()
+    end if
+
     ! First choose scheme, and for full 3D schemes then choose equation
-    select case ( transport_metadata%get_scheme() )
+    select case ( transport_metadata_option%get_scheme() )
 
     ! -------------------------------------------------------------------------!
     ! Full 3D Method of Lines scheme
     ! -------------------------------------------------------------------------!
     case ( scheme_mol_3d )
       ! Choose form of transport equation
-      select case ( transport_metadata%get_equation_form() )
+      select case ( transport_metadata_option%get_equation_form() )
       case ( equation_form_conservative )
          call mol_conservative_alg(field_np1, field_n, &
-                                   direction_3d, transport_metadata)
+                                   direction_3d, transport_metadata_option)
 
       case ( equation_form_advective )
          call mol_advective_alg(field_np1, field_n, &
-                                direction_3d, transport_metadata)
+                                direction_3d, transport_metadata_option)
 
       case ( equation_form_consistent )
          call mol_consistent_alg(field_np1, field_n, &
-                                 direction_3d, transport_metadata)
+                                 direction_3d, transport_metadata_option)
 
       case default
         call log_event('Trying to solve unrecognised form of transport equation', &
@@ -127,10 +146,10 @@ contains
     ! -------------------------------------------------------------------------!
     case ( scheme_ffsl_3d )
       ! Choose form of transport equation
-      select case ( transport_metadata%get_equation_form() )
+      select case ( transport_metadata_option%get_equation_form() )
       case ( equation_form_conservative, equation_form_advective )
         call ffsl_control(field_np1, field_n, direction_3d, &
-                          model_dt, transport_metadata)
+                          model_dt, transport_metadata_option)
 
       case ( equation_form_consistent )
         call log_event('Consistent 3D FFSL not implemented', LOG_LEVEL_ERROR)
@@ -146,7 +165,7 @@ contains
     ! -------------------------------------------------------------------------!
     case ( scheme_split )
       call split_transport_control(field_np1, field_n, model_dt, &
-                                   transport_metadata)
+                                   transport_metadata_option)
 
     case default
       call log_event('Trying to transport with unrecognised scheme', &

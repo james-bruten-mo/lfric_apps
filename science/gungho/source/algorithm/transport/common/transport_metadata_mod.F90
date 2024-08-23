@@ -56,6 +56,8 @@ module transport_metadata_mod
     procedure, public :: get_reversible
     procedure, public :: get_ffsl_splitting
     procedure, public :: get_ffsl_vertical_order
+    procedure, public :: set_advective
+    procedure, public :: set_no_mono
 
   end type transport_metadata_type
 
@@ -381,5 +383,48 @@ contains
     ffsl_vertical_order = self%ffsl_vertical_order
 
   end function get_ffsl_vertical_order
+
+  !> @brief Change the transport metadata to run advective transport options
+  !> @param[in] self     The transport_metadata object
+  subroutine set_advective(self)
+
+    implicit none
+
+    class(transport_metadata_type), intent(inout) :: self
+
+    ! Set equation form to be advective
+    self%equation_form = 2
+    ! If horizontal scheme is FFSL set scheme to be semi-Lagrangian
+    if (self%horizontal_method==2) then
+      self%horizontal_method = 3
+      self%vertical_method = 3
+      ! Ensure correct monotone options
+      if (self%horizontal_monotone == 2 .OR. &
+          self%horizontal_monotone == 3 .OR. &
+          self%horizontal_monotone == 7 ) then
+        self%horizontal_monotone = 4
+      end if
+      if (self%vertical_monotone == 2 .OR. &
+          self%vertical_monotone == 3 .OR. &
+          self%vertical_monotone == 7  ) then
+        self%vertical_monotone = 4
+      end if
+    end if
+
+  end subroutine set_advective
+
+  !> @brief Change the transport metadata to run without monotonicity
+  !> @param[in] self     The transport_metadata object
+  subroutine set_no_mono(self)
+
+    implicit none
+
+    class(transport_metadata_type), intent(inout) :: self
+
+    ! Switch off monotonicity
+    self%horizontal_monotone = 1
+    self%vertical_monotone   = 1
+
+  end subroutine set_no_mono
 
 end module transport_metadata_mod

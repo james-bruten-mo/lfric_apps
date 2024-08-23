@@ -77,6 +77,10 @@ contains
     ! The saved version of field after slow physics
     type(field_type), pointer :: single_field_in => null()
 
+    ! Transport runtime and form of transport equation
+    type(transport_runtime_type), pointer :: transport_runtime
+    integer(kind=i_def)                   :: equation_form
+
     if ( subroutine_timers ) call timer('transport.tracer_collection')
 
       if ( fields_in%get_length() > 0 ) then
@@ -93,6 +97,15 @@ contains
           call log_event( "Advecting "//  trim(single_field_in%get_name()), &
                            LOG_LEVEL_INFO)
 
+          ! Get correct equation form depending on advective form flag
+          transport_runtime => get_transport_runtime(single_field_in%get_mesh())
+          if ( transport_runtime%get_advective_flag() ) then
+            equation_form = equation_form_advective
+          else
+            equation_form = transport_metadata%get_equation_form()
+          end if
+          nullify( transport_runtime )
+
           ! ------------------------------------------------------------------------ !
           ! Transport depending on equation
           ! If the equation form is advective:
@@ -107,7 +120,7 @@ contains
           !           algorithm (this also divides the result by density at the end
           !           of the transport step and so returns an updated field.)
           ! ------------------------------------------------------------------------ !
-          select case ( transport_metadata%get_equation_form() )
+          select case ( equation_form )
 
             ! ------------------------------------------------------------------------ !
             ! Advective and consistent forms of transport equation
@@ -183,6 +196,10 @@ contains
     type(function_space_type), pointer :: coarse_fs => null()
     type(field_type)                   :: coarse_field_in, coarse_field_out
 
+    ! Transport runtime and form of transport equation
+    type(transport_runtime_type), pointer :: transport_runtime
+    integer(kind=i_def)                   :: equation_form
+
     if ( subroutine_timers ) call timer('transport.tracer_collection')
 
 
@@ -205,11 +222,20 @@ contains
         call coarse_field_in%initialise(coarse_fs)
         call coarse_field_out%initialise(coarse_fs)
 
+        ! Get correct equation form depending on advective form flag
+        transport_runtime => get_transport_runtime(single_field_in%get_mesh())
+        if ( transport_runtime%get_advective_flag() ) then
+          equation_form = equation_form_advective
+        else
+          equation_form = transport_metadata%get_equation_form()
+        end if
+        nullify( transport_runtime )
+
         ! Map to coarse mesh ----------------------------------------------- !
         call map_scalar_intermesh(coarse_field_in, single_field_in)
 
         ! Choose form of transport equation
-        select case ( transport_metadata%get_equation_form() )
+        select case ( equation_form )
 
           ! ------------------------------------------------------------------------ !
           ! Advective form of transport equation

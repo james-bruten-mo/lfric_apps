@@ -259,6 +259,7 @@ zero_w2v_wind=.false.,
   operators = 'fv'
   vertical_sl_order='cubic'
   slice_order='cubic'
+  si_outer_transport='none'
   reversible = .true., .true., .false.
   runge_kutta_method = 'ssp5'
   min_val_abs_tol=-1.0e-12

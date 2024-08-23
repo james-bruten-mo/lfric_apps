@@ -33,6 +33,7 @@ contains
     use transport_config_mod, only: operators_fv,                  &
                                     runge_kutta_method_ssp2,       &
                                     slice_order_cubic,             &
+                                    si_outer_transport_none,       &
                                     vertical_sl_order_quintic,     &
                                     max_vert_cfl_calc_uniform,     &
                                     theta_variable_dry,            &
@@ -56,6 +57,7 @@ contains
                                  cheap_update = .false.,                                   &
                                  slice_order = slice_order_cubic,                          &
                                  vertical_sl_order = vertical_sl_order_quintic,            &
+                                 si_outer_transport = si_outer_transport_none,             &
                                  theta_variable=theta_variable_dry,                        &
                                  calculate_detj = calculate_detj_upwind,                   &
                                  dep_pt_stencil_extent = 2,                                &

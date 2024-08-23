@@ -15,6 +15,9 @@ module check_configuration_mod
                                   consistent_metric,               &
                                   fv_horizontal_order,             &
                                   fv_vertical_order,               &
+                                  cheap_update,                    &
+                                  si_outer_transport,              &
+                                  si_outer_transport_none,         &
                                   profile_size,                    &
                                   scheme,                          &
                                   splitting,                       &
@@ -328,6 +331,10 @@ contains
           write( log_scratch_space, '(A)' ) 'Special_edges_treatment only valid for linear coord_order'
           call log_event( log_scratch_space, LOG_LEVEL_ERROR )
         end if
+      end if
+      if ( si_outer_transport /= si_outer_transport_none .AND. cheap_update) then
+          write( log_scratch_space, '(A)' ) 'Cheap update cannot be used with si_outer_transport options'
+          call log_event( log_scratch_space, LOG_LEVEL_ERROR )
       end if
 
       ! Find splitting used by dry field

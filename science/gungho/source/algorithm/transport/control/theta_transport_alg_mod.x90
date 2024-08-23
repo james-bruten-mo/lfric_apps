@@ -42,8 +42,11 @@ module theta_transport_alg_mod
                                             equation_form_consistent
   use transport_field_mod,            only: transport_field
   use transport_metadata_mod,         only: transport_metadata_type
-  use transport_rho_times_field_alg_mod, &
+  use transport_rho_times_field_alg_mod,  &
                                       only: transport_rho_times_field_alg
+  use transport_runtime_alg_mod,      only: transport_runtime_type
+  use transport_runtime_collection_mod,   &
+                                      only: get_transport_runtime
 
   implicit none
 
@@ -94,6 +97,9 @@ contains
     type(field_type),             pointer :: height_wt
     type(function_space_type),    pointer :: wt_fs => null()
 
+    ! Transport runtime and form of transport equation
+    type(transport_runtime_type), pointer :: transport_runtime
+    integer(kind=i_def)                   :: equation_form
 
     ! ------------------------------------------------------------------------ !
     ! Convert to the particular potential temperature to be transported
@@ -137,6 +143,15 @@ contains
 
     end select
 
+    ! Get correct equation form depending on advective form flag
+    transport_runtime => get_transport_runtime(theta_in_rdef%get_mesh())
+    if ( transport_runtime%get_advective_flag() ) then
+      equation_form = equation_form_advective
+    else
+      equation_form = transport_metadata%get_equation_form()
+    end if
+    nullify( transport_runtime )
+
     ! ------------------------------------------------------------------------ !
     ! Transport depending on equation
     ! If the equation form is advective:
@@ -151,8 +166,7 @@ contains
     !           algorithm (this also divides the result by density at the end
     !           of the transport step and so returns an updated field.)
     ! ------------------------------------------------------------------------ !
-    select case ( transport_metadata%get_equation_form() )
-
+    select case ( equation_form )
 
       ! ---------------------------------------------------------------------- !
       ! Advective and consistent forms of transport equation

@@ -36,6 +36,7 @@ contains
     use transport_config_mod, only : runge_kutta_method_ssp2,       &
                                      operators_fv,                  &
                                      slice_order_cubic,             &
+                                     si_outer_transport_none,       &
                                      vertical_sl_order_quintic,     &
                                      max_vert_cfl_calc_uniform,     &
                                      theta_variable_dry,            &
@@ -64,6 +65,7 @@ contains
                                  ffsl_unity_3d = .true.,                                   &
                                  slice_order = slice_order_cubic,                          &
                                  vertical_sl_order = vertical_sl_order_quintic,            &
+                                 si_outer_transport = si_outer_transport_none,             &
                                  theta_variable=theta_variable_dry,                        &
                                  theta_dispersion_correction  = .false.,                   &
                                  use_density_predictor = .false.,                          &

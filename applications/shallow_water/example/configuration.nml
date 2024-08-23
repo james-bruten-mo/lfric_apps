@@ -218,6 +218,7 @@ runge_kutta_method       = 'ssp3'
         ! 'ssp3' should be used with semi-implicit time stepping, 
         ! 'forward_euler' should be used with explicit time stepping
 scheme                   = 7*1
+si_outer_transport       = 'none'
 slice_order              = 'cubic'
 splitting                = 7*1
 theta_dispersion_correction=.false.
