@@ -127,7 +127,7 @@ contains
     integer(kind=i_def), intent(in)    :: map_chi(ndf_chi)
     integer(kind=i_def), intent(in)    :: map_pid(ndf_pid)
 
-    real(kind=r_def),    intent(inout) :: mm(ndf_w2,ndf_w2,ncell_3d)
+    real(kind=r_def),    intent(inout) :: mm(ncell_3d,ndf_w2,ndf_w2)
     real(kind=r_def),    intent(in)    :: basis_chi(1,ndf_chi,nqp_h,nqp_v)
     real(kind=r_def),    intent(in)    :: diff_basis_chi(3,ndf_chi,nqp_h,nqp_v)
     real(kind=r_def),    intent(in)    :: chi1(undf_chi)
@@ -180,7 +180,7 @@ contains
       ! Only use dofs corresponding to vertical part of basis function
       do df2 = 1, ndf_w2
         do df = 1, ndf_w2 ! Mass matrix is not symmetric for damping layer
-          mm(df,df2,ik) = 0.0_r_def
+          mm(ik,df,df2) = 0.0_r_def
           do qp2 = 1, nqp_v
             do qp1 = 1, nqp_h
               chi1_at_quad = 0.0_r_def
@@ -217,11 +217,11 @@ contains
                           /dj(qp1,qp2)
               ! Only modify dofs corresponding to vertical part of w-basis function (for lowest order: bottom two rows)
               if (df > ndf_w2 - (element_order+2)*(element_order+1)**2) then
-                mm(df,df2,ik) = mm(df,df2,ik) +                          &
+                mm(ik,df,df2) = mm(ik,df,df2) +                          &
                                 (1.0_r_def + real(dt, r_def)*mu_at_quad) &
                                 * integrand
               else
-                mm(df,df2,ik) = mm(df,df2,ik) + integrand
+                mm(ik,df,df2) = mm(ik,df,df2) + integrand
               end if
             end do
           end do

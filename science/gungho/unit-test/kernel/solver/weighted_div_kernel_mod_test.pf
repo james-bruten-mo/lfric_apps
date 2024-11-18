@@ -125,7 +125,7 @@ contains
     call get_gaussian_q3x3x3_quadrature_weights_z(wv)
 
     ncell_3d = ncells*nlayers
-    allocate(local_stencil(ndf_w2, ndf_w3, ncell_3d))
+    allocate(local_stencil(ncell_3d, ndf_w2, ndf_w3))
     local_stencil(:,:,:) = 0.0_r_solver
     allocate(theta_p_data(undf_w0))
     theta_p_data(:) = 300.0_r_solver
@@ -157,9 +157,9 @@ contains
     if ( r_solver == real64 ) then
       use_tol = tol
     else
-      use_tol = 10.0_r_solver*spacing( maxval(local_stencil(:, :, 1 )) )
+      use_tol = 10.0_r_solver*spacing( maxval(local_stencil(1, :, :)) )
     endif
-    @assertEqual(answer, transpose(local_stencil(:, :, 1 )), use_tol)
+    @assertEqual(answer, transpose(local_stencil(1, :, :)), use_tol)
 
     deallocate(basis_w0)
     deallocate(diff_basis_w0)

@@ -120,7 +120,7 @@ subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
 
   integer(kind=i_def), intent(in)    :: map_chi(ndf_chi)
   integer(kind=i_def), intent(in)    :: map_pid(ndf_pid)
-  real(kind=r_def),    intent(inout) :: mm(ndf,ndf,ncell_3d)
+  real(kind=r_def),    intent(inout) :: mm(ncell_3d,ndf,ndf)
   real(kind=r_def),    intent(in)    :: basis_chi(1,ndf_chi,nqp_h,nqp_v)
   real(kind=r_def),    intent(in)    :: diff_basis_chi(3,ndf_chi,nqp_h,nqp_v)
   real(kind=r_def),    intent(in)    :: chi_1(undf_chi)
@@ -171,7 +171,7 @@ subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
                              basis_chi, diff_basis_chi, jac, dj )
 
     ik = k + (cell-1)*nlayers
-    mm(:,:,ik) = 0.0_r_def
+    mm(ik,:,:) = 0.0_r_def
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         do df2 = 1, ndf
@@ -181,7 +181,7 @@ subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
                         /dj(qp1,qp2)
           do df = 1, ndf
              jac_v = matmul(jac(:,:,qp1,qp2),basis(:,df,qp1,qp2))
-             mm(df,df2,ik) = mm(df,df2,ik) - dot_product(jac_v,omega_cross_u)
+             mm(ik,df,df2) = mm(ik,df,df2) - dot_product(jac_v,omega_cross_u)
           end do
         end do
       end do

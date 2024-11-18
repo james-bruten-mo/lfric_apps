@@ -10,8 +10,8 @@
 module setop_random_kernel_mod
 
   use argument_mod,                          only : any_space_1, any_space_2, &
-                                                    arg_type, cell_column, &
-                                                    gh_operator, gh_real, &
+                                                    arg_type, cell_column,    &
+                                                    gh_operator, gh_real,     &
                                                     gh_write
   use kernel_mod,                            only : kernel_type
   use constants_mod,                         only : i_def, r_def, r_solver
@@ -54,12 +54,12 @@ contains
     integer(kind=i_def), intent(in) :: cell
     integer(kind=i_def), intent(in) :: ncell_3d
     integer(kind=i_def), intent(in) :: ndf_aspc1, ndf_aspc2
-    real(kind=r_def), intent(inout), dimension(ndf_aspc1, ndf_aspc2, ncell_3d) :: operator_data
+    real(kind=r_def), intent(inout), dimension(ncell_3d, ndf_aspc1, ndf_aspc2) :: operator_data
     integer(kind=i_def) :: k, ik
 
     do k = 0, nlayers-1
       ik = (cell-1)*nlayers + k + 1
-      call random_number(operator_data(:,:,ik))
+      call random_number(operator_data(ik,:,:))
     end do
 
   end subroutine setop_random_kernel_code_r_def
@@ -81,12 +81,12 @@ contains
     integer(kind=i_def), intent(in) :: cell
     integer(kind=i_def), intent(in) :: ncell_3d
     integer(kind=i_def), intent(in) :: ndf_aspc1, ndf_aspc2
-    real(kind=r_solver), intent(inout), dimension(ndf_aspc1, ndf_aspc2, ncell_3d) :: operator_data
+    real(kind=r_solver), intent(inout), dimension(ncell_3d, ndf_aspc1, ndf_aspc2) :: operator_data
     integer(kind=i_def) :: k, ik
 
     do k = 0, nlayers-1
       ik = (cell-1)*nlayers + k + 1
-      call random_number(operator_data(:,:,ik))
+      call random_number(operator_data(ik,:,:))
     end do
 
   end subroutine setop_random_kernel_code_r_solver

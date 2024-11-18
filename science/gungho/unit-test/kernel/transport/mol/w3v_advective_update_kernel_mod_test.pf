@@ -45,7 +45,7 @@ contains
     integer(kind=i_def), parameter                           :: undf_ws = ndf_ws*nlayers
     integer(kind=i_def), dimension(ndf_ws)                   :: map_ws
     real(kind=r_tran),   dimension(undf_ws)                  :: advective_update
-    real(kind=r_def),    dimension(ndf_ws, ndf_ws, ncell_3d) :: m3_inv
+    real(kind=r_def),    dimension(ncell_3d, ndf_ws, ndf_ws) :: m3_inv
     ! Vector Space
     integer(kind=i_def), parameter          :: ndf_wv  = 2_i_def
     integer(kind=i_def), parameter          :: undf_wv = nlayers + 1

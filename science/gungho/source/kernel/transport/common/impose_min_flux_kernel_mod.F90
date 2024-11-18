@@ -80,7 +80,7 @@ subroutine impose_min_flux_code(cell,              &
   integer(kind=i_def), dimension(ndf2), intent(in) :: map2
   real(kind=r_tran), dimension(undf2),               intent(inout) :: flux
   real(kind=r_tran), dimension(undf1),               intent(in)    :: field
-  real(kind=r_tran), dimension(ndf1,ndf2,ncell_3d1), intent(in)    :: div
+  real(kind=r_tran), dimension(ncell_3d1,ndf1,ndf2), intent(in)    :: div
   real(kind=r_tran), intent(in)                                    :: field_min
   real(kind=r_tran), intent(in)                                    :: dts
 
@@ -103,7 +103,7 @@ subroutine impose_min_flux_code(cell,              &
        flux_change_id = 0_i_def
 
        do df2 = 1, ndf2
-         inc = - dts*real(div(df1,df2,ik),r_tran)*cell_fluxes(df2)
+         inc = - dts*real(div(ik,df1,df2),r_tran)*cell_fluxes(df2)
          if ( inc < 0.0_r_tran ) then
              inc_n = inc_n - inc
              flux_change_id(df2) = 1_i_def

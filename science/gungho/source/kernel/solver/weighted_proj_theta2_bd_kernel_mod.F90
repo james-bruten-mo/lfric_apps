@@ -129,7 +129,7 @@ contains
 
     integer(kind=i_def), dimension(ndf_wtheta), intent(in) :: map_wtheta
 
-    real(kind=r_solver), dimension(ndf_wtheta,ndf_w2,ncell_3d), intent(inout) :: projection
+    real(kind=r_solver), dimension(ncell_3d,ndf_wtheta,ndf_w2), intent(inout) :: projection
     real(kind=r_solver), dimension(undf_wtheta),                intent(in)    :: theta
     real(kind=r_solver),                                        intent(in)    :: scalar
 
@@ -199,7 +199,7 @@ contains
                           (theta_at_fquad - theta_next_at_fquad)
             end if
             do dft = 1,ndf_wtheta
-              projection(dft,df2,ik) = projection(dft,df2,ik) &
+              projection(ik,dft,df2) = projection(ik,dft,df2) &
                                      + rsol_wtheta_basis_face(1,dft,qp,face) &
                                      * flux_term * scalar
 

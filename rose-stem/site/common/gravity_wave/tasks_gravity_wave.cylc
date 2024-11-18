@@ -43,6 +43,7 @@
         "resolution": "LAM50x50-2x2",
         "DT": 1,
         "tsteps": 200,
+        "wallclock": 12,
         "plot_str": "spherical_and_vertical_slice_ugrid_plot.py $NODAL_DATA_DIR/lfric_diag.nc $PLOT_DIR buoyancy xy:xz -1 linear lam_gw",
     }) %}
 

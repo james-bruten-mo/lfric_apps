@@ -193,7 +193,7 @@ contains
     allocate( basis_chi,    source=basis_w0 )
     allocate( diff_basis_chi,    source=diff_basis_w0 )
 
-    allocate( local_stencil( ndf_w3, ndf_w3, ncells_3d ) )
+    allocate( local_stencil( ncells_3d, ndf_w3, ndf_w3 ) )
     allocate( rho_data(undf_w3) )
 
     rho_data(:) = 1.0_r_def

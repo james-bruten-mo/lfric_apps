@@ -112,8 +112,8 @@ subroutine project_eliminated_theta_q32_code(cell, nlayers, ncell_3d, &
   real(kind=r_def), dimension(1, ndf_wt, nqp_h, nqp_v), intent(in) :: basis_wt
   real(kind=r_def), dimension(3, ndf_wt, nqp_h, nqp_v), intent(in) :: diff_basis_wt
 
-  real(kind=r_solver), dimension(ndf_w3, ndf_w2, ncell_3d),  intent(inout) :: q32_op
-  real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell_3d1), intent(in)    :: inv_m3
+  real(kind=r_solver), dimension(ncell_3d, ndf_w3, ndf_w2),  intent(inout) :: q32_op
+  real(kind=r_solver), dimension(ncell_3d1, ndf_w3, ndf_w3), intent(in)    :: inv_m3
 
   real(kind=r_solver), dimension(undf_wt), intent(in) :: theta
   real(kind=r_solver),                     intent(in) :: const
@@ -162,7 +162,7 @@ subroutine project_eliminated_theta_q32_code(cell, nlayers, ncell_3d, &
         end do
        end do
     end do
-    q32_op(:,:,ik) = q32_op(:,:,ik) + matmul(inv_m3(:,:,ik), proj(:,:))
+    q32_op(ik,:,:) = q32_op(ik,:,:) + matmul(inv_m3(ik,:,:), proj(:,:))
   end do
 
 end subroutine project_eliminated_theta_q32_code

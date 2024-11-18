@@ -66,8 +66,8 @@ subroutine lagged_orog_operator_kernel_code(cell,                 &
   integer(kind=i_def), intent(in) :: ncell_3d_2
   integer(kind=i_def), intent(in) :: ndf1
 
-  real(kind=r_def), dimension(ndf1,ndf1,ncell_3d_1), intent(inout) :: lagged_orog_operator
-  real(kind=r_def), dimension(ndf1,ndf1,ncell_3d_2), intent(in)    :: mass_matrix1
+  real(kind=r_def), dimension(ncell_3d_1,ndf1,ndf1), intent(inout) :: lagged_orog_operator
+  real(kind=r_def), dimension(ncell_3d_2,ndf1,ndf1), intent(in)    :: mass_matrix1
 
   ! Internal variables
   integer(kind=i_def) :: k, ik, df1, df2
@@ -75,16 +75,16 @@ subroutine lagged_orog_operator_kernel_code(cell,                 &
   do k = 0, nlayers - 1
     ik = k + 1 + (cell-1)*nlayers
 
-    lagged_orog_operator(:,:,ik) = 0.0_r_def
+    lagged_orog_operator(ik,:,:) = 0.0_r_def
 
     do df1 = 1,4
       do df2 = 1,4
-        lagged_orog_operator(df1,df2,ik) = mass_matrix1(df1,df2,ik)
+        lagged_orog_operator(ik,df1,df2) = mass_matrix1(ik,df1,df2)
       end do
     end do
     do df1 = 5,6
       do df2 = 5,6
-        lagged_orog_operator(df1,df2,ik) = mass_matrix1(df1,df2,ik)
+        lagged_orog_operator(ik,df1,df2) = mass_matrix1(ik,df1,df2)
       end do
     end do
 

@@ -88,8 +88,8 @@ contains
 
     ! Test the operator kernel
     ncell_3d = ncells * nlayers
-    allocate( m_w2(ndf_w2, ndf_w2, ncell_3d) )
-    allocate( lagged_m_w2(ndf_w2, ndf_w2, ncell_3d) )
+    allocate( m_w2(ncell_3d, ndf_w2, ndf_w2) )
+    allocate( lagged_m_w2(ncell_3d, ndf_w2, ndf_w2) )
     m_w2 = 2.0_r_def
 
     cell = 1
@@ -146,7 +146,7 @@ contains
                        2.00_r_def, &
                        2.00_r_def ], shape(answer) )
 
-    @assertEqual( answer, lagged_m_w2(:, :, 1 ), tol )
+    @assertEqual( answer, lagged_m_w2(1, :, :), tol )
 
     deallocate( m_w2, lagged_m_w2 )
 

@@ -82,9 +82,9 @@ contains
                                             helm_u, helm_d, helm_uu, helm_dd
 
     ! Operators
-    real(kind=r_solver), dimension(ndf_w2, ndf_w3, ncell) :: div_star
-    real(kind=r_solver), dimension(ndf_w3, ndf_w2, ncell) :: q32
-    real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell) :: m3_exner_star
+    real(kind=r_solver), dimension(ncell, ndf_w2, ndf_w3) :: div_star
+    real(kind=r_solver), dimension(ncell, ndf_w3, ndf_w2) :: q32
+    real(kind=r_solver), dimension(ncell, ndf_w3, ndf_w3) :: m3_exner_star
 
     ! Number of dofs in a single column: 4*nlayers horizontal dofs
     ! and (nlayers + 1) vertical dofs

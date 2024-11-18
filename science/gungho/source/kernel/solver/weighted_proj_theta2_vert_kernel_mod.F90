@@ -96,7 +96,7 @@ subroutine weighted_proj_theta2_vert_code(cell, nlayers, ncell_3d,              
   real(kind=r_def), dimension(3,ndf_wtheta,nqp_h,nqp_v), intent(in) :: wtheta_diff_basis
   real(kind=r_def), dimension(3,ndf_w2,nqp_h,nqp_v),     intent(in) :: w2_basis
 
-  real(kind=r_solver), dimension(ndf_wtheta,ndf_w2,ncell_3d), intent(inout) :: projection
+  real(kind=r_solver), dimension(ncell_3d,ndf_wtheta,ndf_w2), intent(inout) :: projection
   real(kind=r_solver), dimension(undf_wtheta),                intent(in)    :: theta
   real(kind=r_solver),                                        intent(in)    :: scalar
 
@@ -128,7 +128,7 @@ subroutine weighted_proj_theta2_vert_code(cell, nlayers, ncell_3d,              
     do df = 1, ndf_wtheta
       theta_e(df)  = theta( map_wtheta(df) + k )
     end do
-    projection(:,:,ik) = 0.0_r_solver
+    projection(ik,:,:) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         grad_theta_at_quad = 0.0_r_solver
@@ -149,7 +149,7 @@ subroutine weighted_proj_theta2_vert_code(cell, nlayers, ncell_3d,              
           i2 = dot_product(i1, rsol_w2_basis(:,df2,qp1,qp2))
           do dft = 1,ndf_wtheta
             integrand = rsol_wtheta_basis(1,dft,qp1,qp2)*i2
-            projection(dft,df2,ik) = projection(dft,df2,ik) + integrand
+            projection(ik,dft,df2) = projection(ik,dft,df2) + integrand
           end do
         end do
       end do

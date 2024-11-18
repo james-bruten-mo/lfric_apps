@@ -148,13 +148,13 @@ subroutine apply_mixed_operator_code(cell,                       &
   real(kind=r_solver), dimension(undf_w3),  intent(in)    :: exner
 
   ! Operators
-  real(kind=r_solver), dimension(ndf_wt, ndf_w2, ncell0), intent(in) :: pt2
-  real(kind=r_solver), dimension(ndf_w2, ndf_w2, ncell1), intent(in) :: mu_cd
-  real(kind=r_solver), dimension(ndf_w2, ndf_wt, ncell2), intent(in) :: p2t
-  real(kind=r_solver), dimension(ndf_w2, ndf_w3, ncell3), intent(in) :: grad
-  real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell4), intent(in) :: m3p
-  real(kind=r_solver), dimension(ndf_w3, ndf_w2, ncell5), intent(in) :: q32
-  real(kind=r_solver), dimension(ndf_w3, ndf_wt, ncell6), intent(in) :: p3t
+  real(kind=r_solver), dimension(ncell0, ndf_wt, ndf_w2), intent(in) :: pt2
+  real(kind=r_solver), dimension(ncell1, ndf_w2, ndf_w2), intent(in) :: mu_cd
+  real(kind=r_solver), dimension(ncell2, ndf_w2, ndf_wt), intent(in) :: p2t
+  real(kind=r_solver), dimension(ncell3, ndf_w2, ndf_w3), intent(in) :: grad
+  real(kind=r_solver), dimension(ncell4, ndf_w3, ndf_w3), intent(in) :: m3p
+  real(kind=r_solver), dimension(ncell5, ndf_w3, ndf_w2), intent(in) :: q32
+  real(kind=r_solver), dimension(ncell6, ndf_w3, ndf_wt), intent(in) :: p3t
 
   ! Internal variables
   integer(kind=i_def)                                :: df, k, ik
@@ -177,7 +177,7 @@ subroutine apply_mixed_operator_code(cell,                       &
   t_col(0) = 0.0_r_solver
   do k = 0, nlayers-1
     ik = (cell-1)*nlayers + k + 1
-    t_e = matmul(pt2(:,:,ik), u_e(:,k))
+    t_e = matmul(pt2(ik,:,:), u_e(:,k))
     t_col(k)   = t_col(k) - mt_lumped_inv(map_wt(1)+k)*t_e(1)
     t_col(k+1) = - mt_lumped_inv(map_wt(2)+k)*t_e(2)
   end do
@@ -192,14 +192,14 @@ subroutine apply_mixed_operator_code(cell,                       &
     p_e(1) = exner(map_w3(1)+k)
 
     ! lhs_u for this element
-    lhs_u_e(:,k) = matmul(mu_cd(:,:,ik), u_e(:,k)) &
-                 - matmul(p2t(:,:,ik),   t_col(k:k+1)) &
-                 - matmul(grad(:,:,ik),  p_e)
+    lhs_u_e(:,k) = matmul(mu_cd(ik,:,:), u_e(:,k)) &
+                 - matmul(p2t(ik,:,:),   t_col(k:k+1)) &
+                 - matmul(grad(ik,:,:),  p_e)
 
     ! lhs_p for this element
-    lhs_p_e = matmul(m3p(:,:,ik), p_e) &
-            - matmul(p3t(:,:,ik), t_col(k:k+1)) &
-            + matmul(q32(:,:,ik), u_e(:,k))
+    lhs_p_e = matmul(m3p(ik,:,:), p_e) &
+            - matmul(p3t(ik,:,:), t_col(k:k+1)) &
+            + matmul(q32(ik,:,:), u_e(:,k))
     lhs_p(map_w3(1)+k) = lhs_p_e(1)
   end do
 

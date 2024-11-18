@@ -93,9 +93,9 @@ subroutine apply_mixed_lp_operator_code(cell,                    &
   real(kind=r_solver), dimension(undf_w3), intent(in)    :: rho, exner
 
   ! Operators
-  real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell1), intent(in) :: m3exner
-  real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell2), intent(in) :: m3rho
-  real(kind=r_solver), dimension(ndf_w3, ndf_wt, ncell3), intent(in) :: p3theta
+  real(kind=r_solver), dimension(ncell1, ndf_w3, ndf_w3), intent(in) :: m3exner
+  real(kind=r_solver), dimension(ncell2, ndf_w3, ndf_w3), intent(in) :: m3rho
+  real(kind=r_solver), dimension(ncell3, ndf_w3, ndf_wt), intent(in) :: p3theta
 
   ! Internal variables
   integer(kind=i_def)                    :: df, k, ik
@@ -114,8 +114,8 @@ subroutine apply_mixed_lp_operator_code(cell,                    &
     ik = (cell-1)*nlayers + k + 1
 
     ! lhs for this element
-    lhs_e = matmul(m3exner(:,:,ik),p_e) - matmul(m3rho(:,:,ik),r_e)   &
-            - matmul(p3theta(:,:,ik),t_e)
+    lhs_e = matmul(m3exner(ik,:,:),p_e) - matmul(m3rho(ik,:,:),r_e)   &
+            - matmul(p3theta(ik,:,:),t_e)
     do df = 1, ndf_w3
       lhs_exner(map_w3(df)+k) = lhs_e(df)
     end do

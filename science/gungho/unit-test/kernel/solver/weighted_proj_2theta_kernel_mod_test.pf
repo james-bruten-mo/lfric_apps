@@ -147,7 +147,7 @@ contains
     allocate(moist_dyn_data(undf_w0))
     moist_dyn_data = 1.0_r_solver
 
-    allocate( local_stencil(ndf_w2, ndf_w0, ncells_3d) )
+    allocate( local_stencil(ncells_3d, ndf_w2, ndf_w0) )
     local_stencil(:,:,:) = 0.0_r_solver
 
     !=====================================
@@ -180,7 +180,7 @@ contains
                                    )
 
     call proj_operator(answer)
-    @assertEqual(answer, local_stencil(:, :, 1 ), tol)
+    @assertEqual(answer, local_stencil(1, :, :), tol)
 
     deallocate( exner_data )
     deallocate( moist_dyn_data )

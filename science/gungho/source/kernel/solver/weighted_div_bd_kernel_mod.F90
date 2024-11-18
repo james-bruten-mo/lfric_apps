@@ -142,7 +142,7 @@ contains
     real(kind=r_def), dimension(1,ndf_wtheta,nqp_f,nfaces_qr), intent(in) :: wtheta_basis_face
     real(kind=r_def), dimension(nqp_f,nfaces_qr),              intent(in) :: wqp_f
 
-    real(kind=r_solver), dimension(ndf_w2,ndf_w3,ncell_3d), intent(inout) :: div
+    real(kind=r_solver), dimension(ncell_3d,ndf_w2,ndf_w3), intent(inout) :: div
     real(kind=r_solver), dimension(undf_wtheta),            intent(in)    :: theta
     real(kind=r_solver),                                    intent(in)    :: scalar
 
@@ -214,7 +214,7 @@ contains
               next_bd_term = -v_dot_n(df2,qp,face)*theta_next_at_fquad
               integrand = rsol_wqp_f(qp,face)*rsol_w3_basis_face(1,df3,qp,face) &
                            * 0.5_r_solver*(this_bd_term + next_bd_term)
-              div(df2,df3,ik) = div(df2,df3,ik) - scalar*integrand
+              div(ik,df2,df3) = div(ik,df2,df3) - scalar*integrand
             end do ! df2
           end do ! df3
 

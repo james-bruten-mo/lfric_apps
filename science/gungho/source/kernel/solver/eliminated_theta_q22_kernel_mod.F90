@@ -137,7 +137,7 @@ subroutine eliminated_theta_q22_code(cell, nlayers, ncell_3d,    &
   real(kind=r_def), dimension(3, ndf_chi, nqp_h, nqp_v), intent(in) :: diff_basis_chi
   real(kind=r_def), dimension(3, ndf_wt,  nqp_h, nqp_v), intent(in) :: diff_basis_wt
 
-  real(kind=r_solver), dimension(ndf_w2, ndf_w2, ncell_3d), intent(inout) :: q22_op
+  real(kind=r_solver), dimension(ncell_3d, ndf_w2, ndf_w2), intent(inout) :: q22_op
 
   real(kind=r_def), dimension(undf_chi),   intent(in) :: chi1, chi2, chi3
   real(kind=r_solver), dimension(undf_wt), intent(in) :: theta, exner
@@ -178,7 +178,7 @@ subroutine eliminated_theta_q22_code(cell, nlayers, ncell_3d,    &
 
     call coordinate_jacobian(ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e, &
                              ipanel, basis_chi, diff_basis_chi, jac, dj)
-    q22_op(:, :, ik) = 0.0_r_solver
+    q22_op(ik, :, :) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         grad_theta(:) = 0.0_r_solver
@@ -198,7 +198,7 @@ subroutine eliminated_theta_q22_code(cell, nlayers, ncell_3d,    &
                      *dot_product(grad_theta(:), rsol_basis_w2(:,df2,qp1,qp2)) &
                      *grad_exner
           do df = 1, ndf_w2
-            q22_op(df,df2,ik) = q22_op(df,df2,ik) + norm_u(map_w2(df)+k) &
+            q22_op(ik,df,df2) = q22_op(ik,df,df2) + norm_u(map_w2(df)+k) &
                                *dot_product(rsol_basis_w2(:,df,qp1,qp2), grad_term)
           end do
         end do

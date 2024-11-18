@@ -81,7 +81,7 @@ contains
     integer(i_def), dimension(ndf_w2)   :: map_w2
 
     ! Operators
-    real(r_def), dimension(ndf_w3,ndf_w2,ncell_3d) :: div
+    real(r_def), dimension(ncell_3d,ndf_w3,ndf_w2) :: div
 
     ! Fields
     real(r_tran), dimension(undf_w3) :: rho
@@ -101,12 +101,12 @@ contains
     map_w2(ndf_w2)     = map_w2(nfaces_h+1) + 1_i_def
 
     do k = 1, nlayers
-      div(1,1,k) = -1.0_r_def
-      div(1,2,k) = 1.0_r_def
-      div(1,3,k) = 1.0_r_def
-      div(1,4,k) = -1.0_r_def
-      div(1,5,k) = -1.0_r_def
-      div(1,6,k) = 1.0_r_def
+      div(k,1,1) = -1.0_r_def
+      div(k,1,2) = 1.0_r_def
+      div(k,1,3) = 1.0_r_def
+      div(k,1,4) = -1.0_r_def
+      div(k,1,5) = -1.0_r_def
+      div(k,1,6) = 1.0_r_def
     end do
 
     rho(:)         = 1.5_r_tran

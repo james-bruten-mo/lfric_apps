@@ -227,11 +227,11 @@ contains
     ncell_3d = ncells*nlayers
 
     ! Create Operators
-    allocate(m3exner(ndf_w3,ndf_w3,ncell_3d))
-    allocate(m3rho(ndf_w3,ndf_w3,ncell_3d))
-    allocate(p3theta(ndf_w3,ndf_wtheta,ncell_3d))
+    allocate(m3exner(ncell_3d,ndf_w3,ndf_w3))
+    allocate(m3rho(ncell_3d,ndf_w3,ndf_w3))
+    allocate(p3theta(ncell_3d,ndf_w3,ndf_wtheta))
 
-    allocate(m3_inv(ndf_w3,ndf_w3,ncell_3d))
+    allocate(m3_inv(ncell_3d,ndf_w3,ndf_w3))
 
     ! Create the data arrays
     allocate(exner_data(undf_w3))
@@ -249,7 +249,7 @@ contains
     p3theta(:,:,:) = 0.0_r_solver
 
     do i = 1,ndf_w3
-      m3_inv(i,i,:) = 1.0_r_solver/real(dx*dy*dz,r_solver)
+      m3_inv(:,i,i) = 1.0_r_solver/real(dx*dy*dz,r_solver)
     end do
 
     call project_eos_operators_code( cell,               &

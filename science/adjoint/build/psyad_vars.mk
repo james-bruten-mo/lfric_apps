@@ -37,19 +37,19 @@ all: export ACTIVE_tl_rhs_project_eos_kernel_mod           := rhs_eos exner exne
 all: export ACTIVE_tl_rhs_sample_eos_kernel_mod            := exner exner_e exner_cell \
                                                               rhs_eos rho rho_e rho_cell \
                                                               theta theta_vd_e theta_vd_cell moist_dyn_gas
-all: export ACTIVE_apply_mixed_lu_operator_kernel_mod      := wind theta exner lhs_e lhs_u \
-                                                              u_e p_e t_e mucd_ue p2t_te grad_pe
-all: export ACTIVE_opt_apply_variable_hx_kernel_mod        := lhs div_u t_e pressure rhs_p x
-all: export ACTIVE_apply_elim_mixed_lp_operator_kernel_mod := theta exner u lhs_exner lhs_e \
-                                                              t_e p_e u_e m3e_pe \
-                                                              p3t_te q32_ue
+all: export ACTIVE_apply_mixed_lu_operator_kernel_mod      := wind theta exner lhs_u lhs_t
+all: export ACTIVE_opt_apply_variable_hx_kernel_mod        := lhs x pressure rhs_p \
+                                                              div_u t_e t_e1_vec t_e2_vec
+all: export ACTIVE_apply_elim_mixed_lp_operator_kernel_mod := theta exner u lhs_exner \
+                                                              lhs_e m3e_pe p3t_te q32_ue \
+                                                              p_e t_e u_e
 all: export ACTIVE_combine_w2_field_kernel_mod         := uvw w uv
 all: export ACTIVE_w2_to_w1_projection_kernel_mod      := v_w1 u_w2 vu res_dot_product wind
 all: export ACTIVE_sample_field_kernel_mod             := field_1 field_2 f_at_node
 all: export ACTIVE_sample_flux_kernel_mod              := flux u
 all: export ACTIVE_split_w2_field_kernel_mod           := uvw w uv
 all: export ACTIVE_strong_curl_kernel_mod              := xi res_dot_product curl_u u
-all: export ACTIVE_matrix_vector_kernel_mod            := lhs lhs_e x x_e
-all: export ACTIVE_dg_inc_matrix_vector_kernel_mod     := lhs lhs_e x x_e
+all: export ACTIVE_matrix_vector_kernel_mod            := lhs x
+all: export ACTIVE_dg_inc_matrix_vector_kernel_mod     := lhs x
 all: export ACTIVE_transpose_matrix_vector_kernel_mod  := lhs lhs_e x x_e
 all: export ACTIVE_dg_matrix_vector_kernel_mod         := lhs lhs_e x x_e

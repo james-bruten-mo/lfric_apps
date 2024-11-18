@@ -145,7 +145,7 @@ contains
     real(kind=r_def), dimension(1,ndf_wtheta,nqp_f,nfaces_qr), intent(in) :: wtheta_basis_face
     real(kind=r_def), dimension(nqp_f,nfaces_qr),              intent(in) :: wqp_f
 
-    real(kind=r_solver), dimension(ndf_w2,ndf_wtheta,ncell_3d), intent(inout) :: projection
+    real(kind=r_solver), dimension(ncell_3d,ndf_w2,ndf_wtheta), intent(inout) :: projection
     real(kind=r_solver), dimension(undf_w3),                    intent(in)    :: exner
     real(kind=r_solver), dimension(undf_wtheta),                intent(in)    :: moist_dyn_factor
     real(kind=r_solver),                                        intent(in)    :: scalar
@@ -209,7 +209,7 @@ contains
               v  = rsol_w2_basis_face(:,df2,qp,face)
 
               integrand = rsol_wqp_f(qp,face)*exner_av*dot_product(v, normal)
-              projection(df2,df0,ik) = projection(df2,df0,ik) - scalar*integrand
+              projection(ik,df2,df0) = projection(ik,df2,df0) - scalar*integrand
             end do ! df2
           end do ! df0
 

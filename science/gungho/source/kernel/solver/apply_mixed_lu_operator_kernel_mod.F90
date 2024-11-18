@@ -104,38 +104,43 @@ subroutine apply_mixed_lu_operator_code(cell,                    &
   real(kind=r_solver), dimension(undf_w3), intent(in)    :: exner
 
   ! Operators
-  real(kind=r_solver), dimension(ndf_w2, ndf_w2, ncell1), intent(in) :: mu_cd
-  real(kind=r_solver), dimension(ndf_w2, ndf_wt, ncell2), intent(in) :: p2theta
-  real(kind=r_solver), dimension(ndf_w2, ndf_w3, ncell3), intent(in) :: grad
+  real(kind=r_solver), dimension(ncell1, ndf_w2, ndf_w2), intent(in) :: mu_cd
+  real(kind=r_solver), dimension(ncell2, ndf_w2, ndf_wt), intent(in) :: p2theta
+  real(kind=r_solver), dimension(ncell3, ndf_w2, ndf_w3), intent(in) :: grad
 
   ! Internal variables
-  integer(kind=i_def)                    :: df, k, ik
-  real(kind=r_solver), dimension(ndf_w2) :: u_e, lhs_e
-  real(kind=r_solver), dimension(ndf_wt) :: t_e
-  real(kind=r_solver), dimension(ndf_w3) :: p_e
+  integer(kind=i_def)                       :: k, ik, df1, df2
+  real(kind=r_solver), dimension(0:nlayers) :: lhs_t
 
-  do k = 0, nlayers-1
-    do df = 1, ndf_w2
-      u_e(df) = wind(map_w2(df)+k)
-    end do
-    do df = 1, ndf_wt
-      t_e(df) = theta(map_wt(df)+k)
-    end do
-    do df = 1, ndf_w3
-      p_e(df) = exner(map_w3(df)+k)
-    end do
+    do df1 = 1, ndf_w2
+      lhs_t = 0.0_r_solver
 
-    ik = (cell-1)*nlayers + k + 1
+      do df2 = 1, ndf_w2
+        do k = 0, nlayers-1
+          ik = (cell-1)*nlayers + k + 1
+          lhs_t(k) = lhs_t(k) + mu_cd(ik,df1,df2) * wind(map_w2(df2)+k)
+        end do
+      end do
 
-    ! lhs_u for this element
-    lhs_e = matmul(mu_cd(:,:,ik), u_e)   &
-          - matmul(p2theta(:,:,ik), t_e) &
-          - matmul(grad(:,:,ik), p_e)
-    do df = 1, ndf_w2
-      lhs_u(map_w2(df)+k) = lhs_u(map_w2(df)+k) &
-                          + norm_u(map_w2(df)+k)*lhs_e(df)
+      do df2 = 1, ndf_wt
+        do k = 0, nlayers-1
+          ik = (cell-1)*nlayers + k + 1
+          lhs_t(k) = lhs_t(k) - p2theta(ik,df1,df2) * theta(map_wt(df2)+k)
+        end do
+      end do
+
+      do df2 = 1, ndf_w3
+        do k = 0, nlayers-1
+          ik = (cell-1)*nlayers + k + 1
+          lhs_t(k) = lhs_t(k) - grad(ik,df1,df2) * exner(map_w3(df2)+k)
+        end do
+      end do
+
+      do k = 0, nlayers-1
+        lhs_u(map_w2(df1)+k) =  lhs_u(map_w2(df1)+k) + &
+            norm_u(map_w2(df1)+k) * lhs_t(k)
+      end do
     end do
-  end do
 
 end subroutine apply_mixed_lu_operator_code
 

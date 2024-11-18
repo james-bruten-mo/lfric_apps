@@ -105,7 +105,7 @@ subroutine weighted_div_code(cell, nlayers, ncell_3d,             &
   real(kind=r_def), dimension(1,ndf_wtheta,nqp_h,nqp_v),   intent(in) :: basis_wtheta
   real(kind=r_def), dimension(3,ndf_wtheta,nqp_h,nqp_v),   intent(in) :: diff_basis_wtheta
 
-  real(kind=r_solver), dimension(ndf_w2,ndf_w3,ncell_3d), intent(inout) :: div
+  real(kind=r_solver), dimension(ncell_3d,ndf_w2,ndf_w3), intent(inout) :: div
   real(kind=r_solver), dimension(undf_wtheta),            intent(in)    :: theta
   real(kind=r_solver),                                    intent(in)    :: scalar
   real(kind=r_def), dimension(nqp_h),                     intent(in)    :: wqp_h
@@ -137,7 +137,7 @@ subroutine weighted_div_code(cell, nlayers, ncell_3d,             &
     do df = 1,ndf_wtheta
       theta_e(df) = theta(map_wtheta(df) + k)
     end do
-    div(:,:,ik) = 0.0_r_solver
+    div(ik,:,:) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         theta_quad      = 0.0_r_solver
@@ -154,7 +154,7 @@ subroutine weighted_div_code(cell, nlayers, ncell_3d,             &
           do df2 = 1, ndf_w2
             div_theta_v = rsol_diff_basis_w2(1,df2,qp1,qp2)*theta_quad &
                         + dot_product(rsol_basis_w2(:,df2,qp1,qp2),grad_theta_quad)
-            div(df2,df3,ik) = div(df2,df3,ik) + integrand*div_theta_v
+            div(ik,df2,df3) = div(ik,df2,df3) + integrand*div_theta_v
           end do
         end do
       end do

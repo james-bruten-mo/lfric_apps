@@ -224,7 +224,7 @@ contains
     cell = 1_i_def
     ncell_3d = ncells*nlayers
 
-    allocate(m3_inv(ndf_w3, ndf_w3, ncell_3d))
+    allocate(m3_inv(ncell_3d, ndf_w3, ndf_w3))
 
     ! Initialise the data
     exner_data(:) = 0.0_r_def
@@ -233,7 +233,7 @@ contains
     moist_dyn_gas_data(:) = 1.0_r_def
 
     do df = 1, ndf_w3
-      m3_inv(df,df,:) = 1.0_r_def
+      m3_inv(:,df,df) = 1.0_r_def
     end do
 
     call project_eos_pressure_code( cell,               &

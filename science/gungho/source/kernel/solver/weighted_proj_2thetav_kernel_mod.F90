@@ -116,7 +116,7 @@ subroutine weighted_proj_2thetav_code(cell, nlayers, ncell_3d,             &
   real(kind=r_def), dimension(1,ndf_wtheta,nqp_h,nqp_v), intent(in) :: basis_wtheta
   real(kind=r_def), dimension(3,ndf_wtheta,nqp_h,nqp_v), intent(in) :: diff_basis_wtheta
 
-  real(kind=r_solver), dimension(ndf_w2,ndf_wtheta,ncell_3d), intent(inout) :: projection
+  real(kind=r_solver), dimension(ncell_3d,ndf_w2,ndf_wtheta), intent(inout) :: projection
   real(kind=r_solver), dimension(undf_w3),                    intent(in)    :: exner
   real(kind=r_solver), dimension(undf_wtheta),                intent(in)    :: moist_dyn_factor
   real(kind=r_solver),                                        intent(in)    :: scalar
@@ -150,7 +150,7 @@ subroutine weighted_proj_2thetav_code(cell, nlayers, ncell_3d,             &
     do df = 1,ndf_w3
       exner_e(df) = exner(map_w3(df) + k)
     end do
-    projection(:,:,ik) = 0.0_r_solver
+    projection(ik,:,:) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         exner_quad = 0.0_r_solver
@@ -165,7 +165,7 @@ subroutine weighted_proj_2thetav_code(cell, nlayers, ncell_3d,             &
             div_gamma_v = rsol_diff_basis_w2(1,df2,qp1,qp2)*rsol_basis_wtheta(1,df0,qp1,qp2) &
                         + dot_product(rsol_basis_w2(:,df2,qp1,qp2), &
                                       rsol_diff_basis_wtheta(:,df0,qp1,qp2))
-            projection(df2,df0,ik) = projection(df2,df0,ik) &
+            projection(ik,df2,df0) = projection(ik,df2,df0) &
                                    + integrand*div_gamma_v*moist_dyn_factor(map_wtheta(df0)+k)
           end do
         end do

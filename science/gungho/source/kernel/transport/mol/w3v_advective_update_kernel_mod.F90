@@ -103,7 +103,7 @@ subroutine w3v_advective_update_code( cell,                &
   real(kind=r_tran), dimension(undf_w2), intent(in)    :: wind
   real(kind=r_tran), dimension(undf_md), intent(in)    :: tracer
 
-  real(kind=r_def), dimension(ndf_w3, ndf_w3, ncell_3d), intent(in) :: m3_inv
+  real(kind=r_def), dimension(ncell_3d, ndf_w3, ndf_w3), intent(in) :: m3_inv
 
   ! Internal variables
   integer(kind=i_def) :: k, ik, df, offset
@@ -147,7 +147,7 @@ subroutine w3v_advective_update_code( cell,                &
     dtdz = t_U - t_D
     ik = 1 + k + (cell-1)*nlayers
     advective_increment(map_w3(1)+k) = advective_increment(map_w3(1)+k) &
-                                     + real( m3_inv(1,1,ik), r_tran )*w*dtdz
+                                     + real( m3_inv(ik,1,1), r_tran )*w*dtdz
   end do
 
 end subroutine w3v_advective_update_code

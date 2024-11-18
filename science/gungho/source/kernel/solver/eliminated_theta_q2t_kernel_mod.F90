@@ -108,7 +108,7 @@ subroutine eliminated_theta_q2t_code(cell, nlayers, ncell_3d, &
   real(kind=r_def), dimension(1, ndf_wt, nqp_h, nqp_v), intent(in) :: basis_wt
   real(kind=r_def), dimension(3, ndf_wt, nqp_h, nqp_v), intent(in) :: diff_basis_wt
 
-  real(kind=r_solver), dimension(ndf_w2, ndf_wt, ncell_3d), intent(inout) :: q2t_op
+  real(kind=r_solver), dimension(ncell_3d, ndf_w2, ndf_wt), intent(inout) :: q2t_op
 
   real(kind=r_solver), dimension(undf_wt), intent(in) :: exner
   real(kind=r_solver), dimension(undf_w2), intent(in) :: norm_u
@@ -134,7 +134,7 @@ subroutine eliminated_theta_q2t_code(cell, nlayers, ncell_3d, &
   do k = 0, nlayers-1
      ik = 1 + k + (cell-1)*nlayers
 
-    q2t_op(:, :, ik) = 0.0_r_solver
+    q2t_op(ik, :, :) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
 
@@ -148,7 +148,7 @@ subroutine eliminated_theta_q2t_code(cell, nlayers, ncell_3d, &
           integrand = wt * const  &
                     * dexnerdz_q * rsol_basis_wt(1,dft,qp1,qp2)
           do df2 = 1, ndf_w2
-            q2t_op(df2,dft,ik) = q2t_op(df2,dft,ik)    &
+            q2t_op(ik,df2,dft) = q2t_op(ik,df2,dft)    &
                                - norm_u(map_w2(df2)+k) &
                                 *rsol_basis_w2(3,df2,qp1,qp2)*integrand
           end do

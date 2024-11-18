@@ -71,7 +71,7 @@ contains
     integer(kind=i_def), parameter :: undf_w2 = ndf_w2
     integer(kind=i_def), parameter :: undf_wt = ndf_wt
     ! Operators to test
-    real(kind=r_solver), dimension(ndf_w3,ndf_w2,ncell) :: q32
+    real(kind=r_solver), dimension(ncell,ndf_w3,ndf_w2) :: q32
     ! Maps
     integer(kind=i_def), dimension(ndf_w3) :: map_w3
     integer(kind=i_def), dimension(ndf_w2) :: map_w2
@@ -87,7 +87,7 @@ contains
     ! Fields
     real(kind=r_solver), dimension(undf_wt) :: theta
     ! Operators
-    real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell) :: inv_m3
+    real(kind=r_solver), dimension(ncell,ndf_w3,ndf_w3) :: inv_m3
     ! Scalars
     real(kind=r_solver) :: const
 
@@ -148,7 +148,7 @@ contains
         answer(df1,df2) = const / 27.0_r_solver * (theta(2)-theta(1))/(theta(2)+theta(1))
       end do
     end do
-    @assertEqual(answer, q32(:,:,1), tol)
+    @assertEqual(answer, q32(1,:,:), tol)
 
   end subroutine test_all
 

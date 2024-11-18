@@ -87,7 +87,7 @@ subroutine iterate_min_flux_code(cell,                    &
   integer(kind=i_def), intent(in)    :: map_w2(ndf_w2)
   real(kind=r_tran),   intent(inout) :: flux(undf_w2)
   real(kind=r_tran),   intent(in)    :: field(undf_w3)
-  real(kind=r_def),    intent(in)    :: div(ndf_w3,ndf_w2,ncell_3d)
+  real(kind=r_def),    intent(in)    :: div(ncell_3d,ndf_w3,ndf_w2)
   real(kind=r_tran),   intent(in)    :: min_value
   real(kind=r_tran),   intent(in)    :: dts
 
@@ -108,7 +108,7 @@ subroutine iterate_min_flux_code(cell,                    &
       flux_change_id = 0
 
       do df_w2 = 1, ndf_w2
-        inc = - dts*real(div(df_w3,df_w2,ik),r_tran)*flux(map_w2(df_w2)+k)
+        inc = - dts*real(div(ik,df_w3,df_w2),r_tran)*flux(map_w2(df_w2)+k)
 
         ! Outgoing fluxes are indicated by flux_change_id
         if ( inc < 0.0_r_tran ) then

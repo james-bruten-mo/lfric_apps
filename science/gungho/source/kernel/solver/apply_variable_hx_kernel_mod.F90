@@ -126,10 +126,10 @@ subroutine apply_variable_hx_code_r_double(cell,                    &
   real(kind=r_double), dimension(undf_w3), intent(in)    :: pressure
   real(kind=r_double),                     intent(in)    :: sgn
 
-  real(kind=r_double), dimension(ndf_w3,ndf_w2,ncell_3d_1), intent(in) :: div
-  real(kind=r_double), dimension(ndf_wt,ndf_w2,ncell_3d_2), intent(in) :: pt2
-  real(kind=r_double), dimension(ndf_w3,ndf_wt,ncell_3d_3), intent(in) :: p3t
-  real(kind=r_double), dimension(ndf_w3,ndf_w3,ncell_3d_4), intent(in) :: m3
+  real(kind=r_double), dimension(ncell_3d_1,ndf_w3,ndf_w2), intent(in) :: div
+  real(kind=r_double), dimension(ncell_3d_2,ndf_wt,ndf_w2), intent(in) :: pt2
+  real(kind=r_double), dimension(ncell_3d_3,ndf_w3,ndf_wt), intent(in) :: p3t
+  real(kind=r_double), dimension(ncell_3d_4,ndf_w3,ndf_w3), intent(in) :: m3
 
   ! Internal variables
   integer(kind=i_def)                 :: df, k, ik, is, ie
@@ -153,7 +153,7 @@ subroutine apply_variable_hx_code_r_double(cell,                    &
     end do
     ik = (cell-1)*nlayers + k + 1
 
-    t_e = matmul(pt2(:,:,ik),x_e)
+    t_e = matmul(pt2(ik,:,:),x_e)
     do df = 1,ndf_wt
       t(map_wt(df)+k) = t(map_wt(df)+k) + t_e(df)
     end do
@@ -173,7 +173,7 @@ subroutine apply_variable_hx_code_r_double(cell,                    &
 
     ik = (cell-1)*nlayers + k + 1
 
-    lhs_e = matmul(m3(:,:,ik),p_e) + sgn*(matmul(div(:,:,ik),x_e) + matmul(p3t(:,:,ik),t_e))
+    lhs_e = matmul(m3(ik,:,:),p_e) + sgn*(matmul(div(ik,:,:),x_e) + matmul(p3t(ik,:,:),t_e))
     do df = 1,ndf_w3
        lhs(map_w3(df)+k) = lhs_e(df)
     end do
@@ -221,10 +221,10 @@ subroutine apply_variable_hx_code_r_single(cell,                    &
   real(kind=r_single), dimension(undf_w3), intent(in)    :: pressure
   real(kind=r_single),                     intent(in)    :: sgn
 
-  real(kind=r_single), dimension(ndf_w3,ndf_w2,ncell_3d_1), intent(in) :: div
-  real(kind=r_single), dimension(ndf_wt,ndf_w2,ncell_3d_2), intent(in) :: pt2
-  real(kind=r_single), dimension(ndf_w3,ndf_wt,ncell_3d_3), intent(in) :: p3t
-  real(kind=r_single), dimension(ndf_w3,ndf_w3,ncell_3d_4), intent(in) :: m3
+  real(kind=r_single), dimension(ncell_3d_1,ndf_w3,ndf_w2), intent(in) :: div
+  real(kind=r_single), dimension(ncell_3d_2,ndf_wt,ndf_w2), intent(in) :: pt2
+  real(kind=r_single), dimension(ncell_3d_3,ndf_w3,ndf_wt), intent(in) :: p3t
+  real(kind=r_single), dimension(ncell_3d_4,ndf_w3,ndf_w3), intent(in) :: m3
 
   ! Internal variables
   integer(kind=i_def)                 :: df, k, ik, is, ie
@@ -248,7 +248,7 @@ subroutine apply_variable_hx_code_r_single(cell,                    &
     end do
     ik = (cell-1)*nlayers + k + 1
 
-    t_e = matmul(pt2(:,:,ik),x_e)
+    t_e = matmul(pt2(ik,:,:),x_e)
     do df = 1,ndf_wt
       t(map_wt(df)+k) = t(map_wt(df)+k) + t_e(df)
     end do
@@ -268,7 +268,7 @@ subroutine apply_variable_hx_code_r_single(cell,                    &
 
     ik = (cell-1)*nlayers + k + 1
 
-    lhs_e = matmul(m3(:,:,ik),p_e) + sgn*(matmul(div(:,:,ik),x_e) + matmul(p3t(:,:,ik),t_e))
+    lhs_e = matmul(m3(ik,:,:),p_e) + sgn*(matmul(div(ik,:,:),x_e) + matmul(p3t(ik,:,:),t_e))
     do df = 1,ndf_w3
        lhs(map_w3(df)+k) = lhs_e(df)
     end do

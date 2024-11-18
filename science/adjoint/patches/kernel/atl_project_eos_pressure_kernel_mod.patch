@@ -32,18 +32,18 @@
 +  subroutine atl_project_eos_pressure_code(cell, nlayers, exner, rho, theta, moist_dyn_gas, ls_rho, ls_theta, ls_moist_dyn_gas, &
  &chi1, chi2, chi3, panel_id, ncell_3d, m3_inv, ndf_w3, undf_w3, map_w3, w3_basis, ndf_wt, undf_wt, map_wt, wt_basis, ndf_chi, &
  &undf_chi, map_chi, chi_basis, chi_diff_basis, ndf_pid, undf_pid, map_pid, nqp_h, nqp_v, wqp_h, wqp_v)
-     use coordinate_jacobian_mod, only : coordinate_jacobian
-@@ -95,9 +96,6 @@
+     use sci_coordinate_jacobian_mod, only : coordinate_jacobian
+@@ -96,9 +97,6 @@
      real(kind=r_def) :: ls_theta_vd_at_quad
      real(kind=r_def) :: tmp_ls_exner
      real(kind=r_def) :: tmp_exner
 -    real(kind=r_def) :: kappa
 -    real(kind=r_def) :: rd
 -    real(kind=r_def) :: p_zero
-     integer :: i
-     integer :: j
  
-@@ -177,6 +175,6 @@
+     exner_e = 0.0_r_def
+     exner_at_quad = 0.0_r_def
+@@ -176,6 +174,6 @@
        enddo
      enddo
  

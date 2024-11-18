@@ -91,7 +91,7 @@ subroutine compute_q_operator_code_r_double(cell, nlayers, ncell_3d,     &
   real(kind=r_def), intent(in) :: basis_wt(1,ndf_wt,nqp_h,nqp_v)
   real(kind=r_def), intent(in) :: basis_w2(3,ndf_w2,nqp_h,nqp_v)
 
-  real(kind=r_double), dimension(ndf_w2,ndf_wt,ncell_3d), intent(inout) :: q
+  real(kind=r_double), dimension(ncell_3d,ndf_w2,ndf_wt), intent(inout) :: q
   real(kind=r_def),    dimension(nqp_h),                  intent(in)    :: wqp_h
   real(kind=r_def),    dimension(nqp_v),                  intent(in)    :: wqp_v
 
@@ -107,13 +107,13 @@ subroutine compute_q_operator_code_r_double(cell, nlayers, ncell_3d,     &
     ik = k + 1 + (cell-1)*nlayers
     do dft = 1, ndf_wt
       do df2 = 1, ndf_w2
-        q(df2,dft,ik) = 0.0_r_double
+        q(ik,df2,dft) = 0.0_r_double
         do qp2 = 1, nqp_v
           do qp1 = 1, nqp_h
             integrand = real(wqp_h(qp1)*wqp_v(qp2)                &
                       *dot_product(basis_w2(:,df2,qp1,qp2),z_hat) &
                       *basis_wt(1,dft,qp1,qp2), r_double)
-            q(df2,dft,ik) = q(df2,dft,ik) + integrand
+            q(ik,df2,dft) = q(ik,df2,dft) + integrand
           end do
         end do
       end do
@@ -140,7 +140,7 @@ subroutine compute_q_operator_code_r_single(cell, nlayers, ncell_3d,     &
   real(kind=r_def), intent(in) :: basis_wt(1,ndf_wt,nqp_h,nqp_v)
   real(kind=r_def), intent(in) :: basis_w2(3,ndf_w2,nqp_h,nqp_v)
 
-  real(kind=r_single), dimension(ndf_w2,ndf_wt,ncell_3d), intent(inout) :: q
+  real(kind=r_single), dimension(ncell_3d,ndf_w2,ndf_wt), intent(inout) :: q
   real(kind=r_def),    dimension(nqp_h),                  intent(in)    :: wqp_h
   real(kind=r_def),    dimension(nqp_v),                  intent(in)    :: wqp_v
 
@@ -156,13 +156,13 @@ subroutine compute_q_operator_code_r_single(cell, nlayers, ncell_3d,     &
     ik = k + 1 + (cell-1)*nlayers
     do dft = 1, ndf_wt
       do df2 = 1, ndf_w2
-        q(df2,dft,ik) = 0.0_r_single
+        q(ik,df2,dft) = 0.0_r_single
         do qp2 = 1, nqp_v
           do qp1 = 1, nqp_h
             integrand = real(wqp_h(qp1)*wqp_v(qp2)                &
                       *dot_product(basis_w2(:,df2,qp1,qp2),z_hat) &
                       *basis_wt(1,dft,qp1,qp2), r_single)
-            q(df2,dft,ik) = q(df2,dft,ik) + integrand
+            q(ik,df2,dft) = q(ik,df2,dft) + integrand
           end do
         end do
       end do

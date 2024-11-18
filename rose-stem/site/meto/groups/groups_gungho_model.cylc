@@ -334,7 +334,7 @@
     ],
     "gungho_model_cartesian": [
         "gungho_model_xc40_cartesian",
-    ],
+    ]
     }) %}
 
 {# Platform Generic Extends #}

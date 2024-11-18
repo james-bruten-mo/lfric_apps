@@ -136,9 +136,9 @@ subroutine elim_helmholtz_operator_code(stencil_size,                     &
                                                             w2_mask
 
   ! Operators
-  real(kind=r_solver), dimension(ndf_w2, ndf_w3, ncell_3d_1), intent(in) :: div_star
-  real(kind=r_solver), dimension(ndf_w3, ndf_w3, ncell_3d_2), intent(in) :: m3_exner_star
-  real(kind=r_solver), dimension(ndf_w3, ndf_w2, ncell_3d_3), intent(in) :: q32
+  real(kind=r_solver), dimension(ncell_3d_1, ndf_w2, ndf_w3), intent(in) :: div_star
+  real(kind=r_solver), dimension(ncell_3d_2, ndf_w3, ndf_w3), intent(in) :: m3_exner_star
+  real(kind=r_solver), dimension(ncell_3d_3, ndf_w3, ndf_w2), intent(in) :: q32
 
   ! Internal variables
   integer(kind=i_def) :: k, ik, kk, df, e, stencil_ik
@@ -282,7 +282,7 @@ subroutine elim_helmholtz_operator_code(stencil_size,                     &
         a_op(df,:,e-1) = -u_normalisation(smap_w2(df,e)+k) &
                          *w2_mask(smap_w2(df,e)+k)         &
                          *hb_lumped_inv(smap_w2(df,e)+k)   &
-                         *div_star(df,:,stencil_ik)
+                         *div_star(stencil_ik,df,:)
       end do
 
       ! Vertical stencil:
@@ -303,14 +303,14 @@ subroutine elim_helmholtz_operator_code(stencil_size,                     &
       kk = -1
       if ( k > 0 ) then
         a_op(df,:,down) = -u_normalisation(map_w2(df)+k+kk)*w2_mask(map_w2(df)+k+kk) &
-                          *hb_lumped_inv(map_w2(df)+k+kk)*div_star(df,:,ik+kk)
+                          *hb_lumped_inv(map_w2(df)+k+kk)*div_star(ik+kk,df,:)
       else
         a_op(df,:,down) = 0.0_r_solver
       end if
       kk = 1
       if ( k < nlayers-1 ) then
         a_op(df,:,up) = -u_normalisation(map_w2(df)+k+kk)*w2_mask(map_w2(df)+k+kk) &
-                        *hb_lumped_inv(map_w2(df)+k+kk)*div_star(df,:,ik+kk)
+                        *hb_lumped_inv(map_w2(df)+k+kk)*div_star(ik+kk,df,:)
       else
         a_op(df,:,up) = 0.0_r_solver
       end if
@@ -325,12 +325,12 @@ subroutine elim_helmholtz_operator_code(stencil_size,                     &
     ! Compute B for all cells in the stencil,
     ! B maps from W2 points to W3 points and we only need it for the central
     ! cell.
-    b_op = q32(:,:,ik)
+    b_op = q32(ik,:,:)
 
     ! Compute C for all cells in the stencil,
     ! C maps from W3 points to W3 points and we only need it for the central
     ! cell.
-    c_op = m3_exner_star(:,:,ik)
+    c_op = m3_exner_star(ik,:,:)
 
     ! Now compute the coefficients:
 

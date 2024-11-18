@@ -74,8 +74,8 @@ contains
     integer(i_def), dimension(ndf_w3) :: map_w3
 
     ! Operators
-    real(r_solver), dimension(ndf_w3, ndf_w3, ncell) :: M3p, M3r
-    real(r_solver), dimension(ndf_w3, ndf_wt, ncell) :: Proj
+    real(r_solver), dimension(ncell, ndf_w3, ndf_w3) :: M3p, M3r
+    real(r_solver), dimension(ncell, ndf_w3, ndf_wt) :: Proj
 
     ! Fields
     real(r_solver), dimension(undf_w3) :: Lp, p, r
@@ -88,11 +88,11 @@ contains
     map_w3 = (/ 1_i_def /)
 
     ! Set up operators
-    M3p(:,:,1) = 11.0_r_solver
-    M3r(:,:,1) = 9.0_r_solver
+    M3p(1,:,:) = 11.0_r_solver
+    M3r(1,:,:) = 9.0_r_solver
 
-    Proj(:,1,1) = 3000.0_r_solver
-    Proj(:,2,1) = 3100.0_r_solver
+    Proj(1,:,1) = 3000.0_r_solver
+    Proj(1,:,2) = 3100.0_r_solver
 
     ! Set up the fields
     t = (/ 300.0_r_solver, 310.0_r_solver /)
@@ -112,7 +112,7 @@ contains
                                       ndf_wt, undf_wt, map_wt)
 
     do df = 1,ndf_w3
-      answer = M3p(df,df,1)*p(df) - M3r(df,df,1)*r(df) - sum(Proj(df,:,1)*t(:))
+      answer = M3p(1,df,df)*p(df) - M3r(1,df,df)*r(df) - sum(Proj(1,df,:)*t(:))
       @assertEqual(answer, Lp(df), tol)
     end do
 

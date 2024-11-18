@@ -132,64 +132,89 @@ subroutine opt_apply_variable_hx_code_r_double(cell,                    &
   real(kind=r_double),                     intent(in)    :: sgn
   real(kind=r_double), dimension(undf_w3), intent(in)    :: rhs_p
 
-  real(kind=r_double), dimension(1,6,ncell_3d_1), intent(in) :: div
-  real(kind=r_double), dimension(2,6,ncell_3d_2), intent(in) :: pt2
-  real(kind=r_double), dimension(1,2,ncell_3d_3), intent(in) :: p3t
-  real(kind=r_double), dimension(1,1,ncell_3d_4), intent(in) :: m3
+  real(kind=r_double), dimension(ncell_3d_1,1,6), intent(in) :: div
+  real(kind=r_double), dimension(ncell_3d_2,2,6), intent(in) :: pt2
+  real(kind=r_double), dimension(ncell_3d_3,1,2), intent(in) :: p3t
+  real(kind=r_double), dimension(ncell_3d_4,1,1), intent(in) :: m3
 
   ! Internal variables
   integer(kind=i_def)            :: k, ik
   real(kind=r_double), dimension(2) :: t_e
   real(kind=r_double)               :: div_u
+  real(kind=r_double), dimension(0:nlayers-1) :: t_e1_vec, t_e2_vec
+  integer(kind=i_def) :: map_w21
+  integer(kind=i_def) :: map_w22
+  integer(kind=i_def) :: map_w23
+  integer(kind=i_def) :: map_w24
+  integer(kind=i_def) :: map_w25
+  integer(kind=i_def) :: map_w26
+  integer(kind=i_def) :: map_w31
+  integer(kind=i_def) :: map_wt1
+  integer(kind=i_def) :: map_wt2
 
-  ! Compute D * u + P3t * Mt^-1 * ( Pt2 * u ) + rhs_p
+  ! Compute D * u + P3t * Mt^-1 * ( Pt2 * u )
   ! Hard wired optimisation for desired configuration (p=0 elements with pt2
   ! only acting on vertical components of u )
+
+  map_w21 = map_w2(1)
+  map_w22 = map_w2(2)
+  map_w23 = map_w2(3)
+  map_w24 = map_w2(4)
+  map_w25 = map_w2(5)
+  map_w26 = map_w2(6)
+  map_w31 = map_w3(1)
+  map_wt1 = map_wt(1)
+  map_wt2 = map_wt(2)
+
   k = 0
   ik = (cell-1)*nlayers + k + 1
 
-  t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-          *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(1,6,ik)  *x(map_w2(6)+k))
-  t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-          *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(1,5,ik+1)*x(map_w2(5)+k+1) &
-          + pt2(2,6,ik)*x(map_w2(6)+k) + pt2(1,6,ik+1)*x(map_w2(6)+k+1))
+  t_e(1) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+          *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik,1,6)  *x(map_w26+k))
+  t_e(2) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+          *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik+1,1,5)*x(map_w25+k+1) &
+          + pt2(ik,2,6)*x(map_w26+k) + pt2(ik+1,1,6)*x(map_w26+k+1))
 
-  div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-        + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-        + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-  lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
+  div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+        + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+        + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+  lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
                    + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
 
   do k = 1,nlayers-2
     ik = (cell-1)*nlayers + k + 1
 
-    t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-            *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(2,5,ik-1)*x(map_w2(5)+k-1) &
-            + pt2(1,6,ik)*x(map_w2(6)+k) + pt2(2,6,ik-1)*x(map_w2(6)+k-1))
-    t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-            *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(1,5,ik+1)*x(map_w2(5)+k+1) &
-            + pt2(2,6,ik)*x(map_w2(6)+k) + pt2(1,6,ik+1)*x(map_w2(6)+k+1))
+    t_e1_vec(k) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+            *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik-1,2,5)*x(map_w25+k-1) &
+            + pt2(ik,1,6)*x(map_w26+k) + pt2(ik-1,2,6)*x(map_w26+k-1))
+    t_e2_vec(k) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+            *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik+1,1,5)*x(map_w25+k+1) &
+            + pt2(ik,2,6)*x(map_w26+k) + pt2(ik+1,1,6)*x(map_w26+k+1))
+  end do
 
-    div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-          + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-          + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-    lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
-                     + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
+  do k = 1,nlayers-2
+    ik = (cell-1)*nlayers + k + 1
+
+    div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+          + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+          + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+    lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
+                     + sgn*(div_u + t_e1_vec(k) + t_e2_vec(k)) + rhs_p(map_w3(1)+k)
   end do
 
   k = nlayers-1
   ik = (cell-1)*nlayers + k + 1
 
-  t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-          *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(2,5,ik-1)*x(map_w2(5)+k-1) &
-          + pt2(1,6,ik)*x(map_w2(6)+k) + pt2(2,6,ik-1)*x(map_w2(6)+k-1))
-  t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-          *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(2,6,ik)  *x(map_w2(6)+k))
+  t_e(1) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+          *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik-1,2,5)*x(map_w25+k-1) &
+          + pt2(ik,1,6)*x(map_w26+k) + pt2(ik-1,2,6)*x(map_w26+k-1))
+  t_e(2) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+          *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik,2,6)  *x(map_w26+k))
 
-  div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-        + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-        + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-  lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
+  div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+        + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+        + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+  lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
                    + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
 
 end subroutine opt_apply_variable_hx_code_r_double
@@ -235,64 +260,89 @@ subroutine opt_apply_variable_hx_code_r_single(cell,                    &
   real(kind=r_single),                     intent(in)    :: sgn
   real(kind=r_single), dimension(undf_w3), intent(in)    :: rhs_p
 
-  real(kind=r_single), dimension(1,6,ncell_3d_1), intent(in) :: div
-  real(kind=r_single), dimension(2,6,ncell_3d_2), intent(in) :: pt2
-  real(kind=r_single), dimension(1,2,ncell_3d_3), intent(in) :: p3t
-  real(kind=r_single), dimension(1,1,ncell_3d_4), intent(in) :: m3
+  real(kind=r_single), dimension(ncell_3d_1,1,6), intent(in) :: div
+  real(kind=r_single), dimension(ncell_3d_2,2,6), intent(in) :: pt2
+  real(kind=r_single), dimension(ncell_3d_3,1,2), intent(in) :: p3t
+  real(kind=r_single), dimension(ncell_3d_4,1,1), intent(in) :: m3
 
   ! Internal variables
-  integer(kind=i_def)               :: k, ik
+  integer(kind=i_def)            :: k, ik
   real(kind=r_single), dimension(2) :: t_e
   real(kind=r_single)               :: div_u
+  real(kind=r_single), dimension(0:nlayers-1) :: t_e1_vec, t_e2_vec
+  integer(kind=i_def) :: map_w21
+  integer(kind=i_def) :: map_w22
+  integer(kind=i_def) :: map_w23
+  integer(kind=i_def) :: map_w24
+  integer(kind=i_def) :: map_w25
+  integer(kind=i_def) :: map_w26
+  integer(kind=i_def) :: map_w31
+  integer(kind=i_def) :: map_wt1
+  integer(kind=i_def) :: map_wt2
 
-  ! Compute D * u + P3t * Mt^-1 * ( Pt2 * u ) + rhs_p
+  ! Compute D * u + P3t * Mt^-1 * ( Pt2 * u )
   ! Hard wired optimisation for desired configuration (p=0 elements with pt2
   ! only acting on vertical components of u )
+
+  map_w21 = map_w2(1)
+  map_w22 = map_w2(2)
+  map_w23 = map_w2(3)
+  map_w24 = map_w2(4)
+  map_w25 = map_w2(5)
+  map_w26 = map_w2(6)
+  map_w31 = map_w3(1)
+  map_wt1 = map_wt(1)
+  map_wt2 = map_wt(2)
+
   k = 0
   ik = (cell-1)*nlayers + k + 1
 
-  t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-          *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(1,6,ik)  *x(map_w2(6)+k))
-  t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-          *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(1,5,ik+1)*x(map_w2(5)+k+1) &
-          + pt2(2,6,ik)*x(map_w2(6)+k) + pt2(1,6,ik+1)*x(map_w2(6)+k+1))
+  t_e(1) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+          *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik,1,6)  *x(map_w26+k))
+  t_e(2) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+          *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik+1,1,5)*x(map_w25+k+1) &
+          + pt2(ik,2,6)*x(map_w26+k) + pt2(ik+1,1,6)*x(map_w26+k+1))
 
-  div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-        + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-        + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-  lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
+  div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+        + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+        + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+  lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
                    + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
 
   do k = 1,nlayers-2
     ik = (cell-1)*nlayers + k + 1
 
-    t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-            *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(2,5,ik-1)*x(map_w2(5)+k-1) &
-            + pt2(1,6,ik)*x(map_w2(6)+k) + pt2(2,6,ik-1)*x(map_w2(6)+k-1))
-    t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-            *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(1,5,ik+1)*x(map_w2(5)+k+1) &
-            + pt2(2,6,ik)*x(map_w2(6)+k) + pt2(1,6,ik+1)*x(map_w2(6)+k+1))
+    t_e1_vec(k) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+            *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik-1,2,5)*x(map_w25+k-1) &
+            + pt2(ik,1,6)*x(map_w26+k) + pt2(ik-1,2,6)*x(map_w26+k-1))
+    t_e2_vec(k) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+            *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik+1,1,5)*x(map_w25+k+1) &
+            + pt2(ik,2,6)*x(map_w26+k) + pt2(ik+1,1,6)*x(map_w26+k+1))
+  end do
 
-    div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-          + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-          + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-    lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
-                     + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
+  do k = 1,nlayers-2
+    ik = (cell-1)*nlayers + k + 1
+
+    div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+          + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+          + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+    lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
+                     + sgn*(div_u + t_e1_vec(k) + t_e2_vec(k)) + rhs_p(map_w3(1)+k)
   end do
 
   k = nlayers-1
   ik = (cell-1)*nlayers + k + 1
 
-  t_e(1) = mt_inv(map_wt(1)+k)*p3t(1,1,ik)                              &
-          *(pt2(1,5,ik)*x(map_w2(5)+k) + pt2(2,5,ik-1)*x(map_w2(5)+k-1) &
-          + pt2(1,6,ik)*x(map_w2(6)+k) + pt2(2,6,ik-1)*x(map_w2(6)+k-1))
-  t_e(2) = mt_inv(map_wt(2)+k)*p3t(1,2,ik)                              &
-          *(pt2(2,5,ik)*x(map_w2(5)+k) + pt2(2,6,ik)  *x(map_w2(6)+k))
+  t_e(1) = mt_inv(map_wt1+k)*p3t(ik,1,1)                              &
+          *(pt2(ik,1,5)*x(map_w25+k) + pt2(ik-1,2,5)*x(map_w25+k-1) &
+          + pt2(ik,1,6)*x(map_w26+k) + pt2(ik-1,2,6)*x(map_w26+k-1))
+  t_e(2) = mt_inv(map_wt2+k)*p3t(ik,1,2)                              &
+          *(pt2(ik,2,5)*x(map_w25+k) + pt2(ik,2,6)  *x(map_w26+k))
 
-  div_u = div(1,1,ik)*x(map_w2(1)+k) + div(1,2,ik)*x(map_w2(2)+k) &
-        + div(1,3,ik)*x(map_w2(3)+k) + div(1,4,ik)*x(map_w2(4)+k) &
-        + div(1,5,ik)*x(map_w2(5)+k) + div(1,6,ik)*x(map_w2(6)+k)
-  lhs(map_w3(1)+k) = m3(1,1,ik)*pressure(map_w3(1)+k) &
+  div_u = div(ik,1,1)*x(map_w21+k) + div(ik,1,2)*x(map_w22+k) &
+        + div(ik,1,3)*x(map_w23+k) + div(ik,1,4)*x(map_w24+k) &
+        + div(ik,1,5)*x(map_w25+k) + div(ik,1,6)*x(map_w26+k)
+  lhs(map_w31+k) = m3(ik,1,1)*pressure(map_w31+k) &
                    + sgn*(div_u + (t_e(1) + t_e(2))) + rhs_p(map_w3(1)+k)
 
 end subroutine opt_apply_variable_hx_code_r_single

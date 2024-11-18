@@ -109,7 +109,7 @@ subroutine sample_eliminated_theta_q32_code(cell, nlayers, ncell_3d,   &
   real(kind=r_def), dimension(1, ndf_wt, ndf_w3), intent(in) :: basis_wt
   real(kind=r_def), dimension(3, ndf_wt, ndf_w3), intent(in) :: diff_basis_wt
 
-  real(kind=r_solver), dimension(ndf_w3, ndf_w2, ncell_3d),  intent(inout) :: q32_op
+  real(kind=r_solver), dimension(ncell_3d, ndf_w3, ndf_w2),  intent(inout) :: q32_op
   real(kind=r_solver), dimension(undf_wt), intent(in)                      :: theta
   real(kind=r_solver), dimension(undf_w3), intent(in)                      :: detj_at_w3
   real(kind=r_solver),                     intent(in)                      :: const
@@ -158,7 +158,7 @@ subroutine sample_eliminated_theta_q32_code(cell, nlayers, ncell_3d,   &
       end do
     end do
     ! Incrementally add sampled operator
-    q32_op(:,:,ik) = q32_op(:,:,ik) + samp(:,:)
+    q32_op(ik,:,:) = q32_op(ik,:,:) + samp(:,:)
   end do
 
 end subroutine sample_eliminated_theta_q32_code

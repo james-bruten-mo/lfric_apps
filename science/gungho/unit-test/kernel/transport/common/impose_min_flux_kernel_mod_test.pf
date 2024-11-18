@@ -81,7 +81,7 @@ contains
     integer(i_def), dimension(ndf_w2)   :: map_w2
 
     ! Operators
-    real(r_tran), dimension(ndf_w3,ndf_w2,ncell_3d) :: div
+    real(r_tran), dimension(ncell_3d,ndf_w3,ndf_w2) :: div
 
     ! Fields
     real(r_tran), dimension(undf_w3) :: rho
@@ -108,7 +108,7 @@ contains
            if ( mod(j,2) == 0.0_r_tran ) then
                edge_value = -1.0_r_tran
            end if
-           div(i,j,:) = edge_value
+           div(:,i,j) = edge_value
        end do
     end do
 

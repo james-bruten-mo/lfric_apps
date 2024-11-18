@@ -117,7 +117,7 @@ contains
     call get_gaussian_q3x3x3_quadrature_weights_z(wv)
 
     ! Create the data arrays
-    allocate(q(ndf_w2,ndf_wt,ncells))
+    allocate(q(ncells,ndf_w2,ndf_wt))
 
     call compute_q_operator_init(dz_test, nlayers)
     cell = 1
@@ -132,7 +132,7 @@ contains
                                   )
 
     call q_operator(answer)
-    @assertEqual(answer, q(:, :, 1 )/dz_test(1), tol)
+    @assertEqual(answer, q(1, :, :)/dz_test(1), tol)
 
     deallocate(basis_w2)
     deallocate(basis_wt)

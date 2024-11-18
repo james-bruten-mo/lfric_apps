@@ -133,7 +133,7 @@ contains
     allocate(theta_data(undf_wt))
     theta_data = 1.0_r_solver
 
-    allocate( local_stencil(ndf_wt, ndf_w2, ncells_3d) )
+    allocate( local_stencil(ncells_3d, ndf_wt, ndf_w2) )
     local_stencil(:,:,:) = 0.0_r_solver
 
     !=====================================
@@ -161,7 +161,7 @@ contains
                                    )
 
     call proj_operator(answer)
-    @assertEqual(answer, local_stencil(:, :, 1 ), tol)
+    @assertEqual(answer, local_stencil(1, :, :), tol)
 
     deallocate( theta_data )
     deallocate( local_stencil )

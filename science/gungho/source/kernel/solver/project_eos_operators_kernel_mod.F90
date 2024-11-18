@@ -140,11 +140,11 @@ subroutine project_eos_operators_code(cell, nlayers,                      &
   integer(kind=i_def), dimension(ndf_pid), intent(in) :: map_pid
   integer(kind=i_def), dimension(ndf_wt),  intent(in) :: map_wt
 
-  real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell_3d1),  intent(inout)  :: m3exner
-  real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell_3d2),  intent(inout)  :: m3rho
-  real(kind=r_solver), dimension(ndf_w3,ndf_wt,ncell_3d3),  intent(inout)  :: p3theta
+  real(kind=r_solver), dimension(ncell_3d1,ndf_w3,ndf_w3),  intent(inout)  :: m3exner
+  real(kind=r_solver), dimension(ncell_3d2,ndf_w3,ndf_w3),  intent(inout)  :: m3rho
+  real(kind=r_solver), dimension(ncell_3d3,ndf_w3,ndf_wt),  intent(inout)  :: p3theta
 
-  real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell_3d4),  intent(in)  :: m3_inv
+  real(kind=r_solver), dimension(ncell_3d4,ndf_w3,ndf_w3),  intent(in)  :: m3_inv
 
   real(kind=r_def), dimension(1,ndf_chi,nqp_h,nqp_v), intent(in) :: basis_chi
   real(kind=r_def), dimension(3,ndf_chi,nqp_h,nqp_v), intent(in) :: diff_basis_chi
@@ -196,9 +196,9 @@ subroutine project_eos_operators_code(cell, nlayers,                      &
       chi3_e(df) = real(chi3(map_chi(df) + k), r_solver)
     end do
     ik = 1 + k + (cell-1)*nlayers
-    m3exner(:,:,ik) = 0.0_r_solver
-    m3rho(:,:,ik)   = 0.0_r_solver
-    p3theta(:,:,ik) = 0.0_r_solver
+    m3exner(ik,:,:) = 0.0_r_solver
+    m3rho(ik,:,:)   = 0.0_r_solver
+    p3theta(ik,:,:) = 0.0_r_solver
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         call pointwise_coordinate_jacobian(ndf_chi, chi1_e, chi2_e, chi3_e,     &
@@ -223,17 +223,17 @@ subroutine project_eos_operators_code(cell, nlayers,                      &
         integrand3 = wt/theta_quad
         do df2 = 1, ndf_w3
           do df1 = 1, ndf_w3
-            m3exner(df1,df2,ik) = m3exner(df1,df2,ik)              &
+            m3exner(ik,df1,df2) = m3exner(ik,df1,df2)              &
                               + integrand1*rsol_basis_w3(1,df1,qp1,qp2) &
                                           *rsol_basis_w3(1,df2,qp1,qp2)
-            m3rho(df1,df2,ik) = m3rho(df1,df2,ik)                  &
+            m3rho(ik,df1,df2) = m3rho(ik,df1,df2)                  &
                               + integrand2*rsol_basis_w3(1,df1,qp1,qp2) &
                                           *rsol_basis_w3(1,df2,qp1,qp2)
           end do
         end do
         do df2 = 1, ndf_wt
           do df1 = 1, ndf_w3
-            p3theta(df1,df2,ik) = p3theta(df1,df2,ik)                &
+            p3theta(ik,df1,df2) = p3theta(ik,df1,df2)                &
                                 + integrand3*rsol_basis_w3(1,df1,qp1,qp2) &
                                             *rsol_basis_wt(1,df2,qp1,qp2)
           end do
@@ -242,9 +242,9 @@ subroutine project_eos_operators_code(cell, nlayers,                      &
     end do
 
     ! Normalise by inverse W3 mass matrix
-    p3theta(:,:,ik) = matmul(m3_inv(:,:,ik), p3theta(:,:,ik))
-    m3exner(:,:,ik) = matmul(m3_inv(:,:,ik), m3exner(:,:,ik))
-    m3rho(:,:,ik)   = matmul(m3_inv(:,:,ik), m3rho(:,:,ik))
+    p3theta(ik,:,:) = matmul(m3_inv(ik,:,:), p3theta(ik,:,:))
+    m3exner(ik,:,:) = matmul(m3_inv(ik,:,:), m3exner(ik,:,:))
+    m3rho(ik,:,:)   = matmul(m3_inv(ik,:,:), m3rho(ik,:,:))
   end do
 
 end subroutine project_eos_operators_code

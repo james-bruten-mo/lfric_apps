@@ -171,9 +171,9 @@ contains
     ncell_3d = ncells*nlayers
 
     ! Create Operators
-    allocate(m3exner(ndf_w3,ndf_w3,ncell_3d))
-    allocate(m3rho(ndf_w3,ndf_w3,ncell_3d))
-    allocate(p3theta(ndf_w3,ndf_wtheta,ncell_3d))
+    allocate(m3exner(ncell_3d,ndf_w3,ndf_w3))
+    allocate(m3rho(ncell_3d,ndf_w3,ndf_w3))
+    allocate(p3theta(ncell_3d,ndf_w3,ndf_wtheta))
 
     ! Create the data arrays
     allocate(exner_data(undf_w3))
@@ -220,9 +220,9 @@ contains
     else
       use_tol = 10.0_r_solver*spacing( maxval(m3exner) )
     endif
-    @assertEqual(answer_exner, m3exner(map_w3(1,cell)+k, map_w3(1,cell)+k, k + 1), use_tol)
-    @assertEqual(answer_rho, m3rho(map_w3(1,cell)+k, map_w3(1,cell)+k, k + 1), use_tol)
-    @assertEqual(answer_theta, p3theta(map_wtheta(1,cell)+k, map_w3(1,cell)+k, k + 1), use_tol)
+    @assertEqual(answer_exner, m3exner(k + 1, map_w3(1,cell)+k, map_w3(1,cell)+k), use_tol)
+    @assertEqual(answer_rho, m3rho(k + 1, map_w3(1,cell)+k, map_w3(1,cell)+k), use_tol)
+    @assertEqual(answer_theta, p3theta(k + 1, map_wtheta(1,cell)+k, map_w3(1,cell)+k), use_tol)
 
 
     deallocate(m3exner)

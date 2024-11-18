@@ -105,7 +105,7 @@ subroutine weighted_m3_code(cell, nlayers, ncell_3d,            &
   integer(kind=i_def), dimension(ndf_w3),  intent(in) :: map_w3
   integer(kind=i_def), dimension(ndf_pid), intent(in) :: map_pid
 
-  real(kind=r_def), dimension(ndf_w3,ndf_w3,ncell_3d),  intent(inout)  :: mm
+  real(kind=r_def), dimension(ncell_3d,ndf_w3,ndf_w3),  intent(inout)  :: mm
 
   real(kind=r_def), dimension(1,ndf_chi,nqp_h,nqp_v), intent(in) :: basis_chi
   real(kind=r_def), dimension(3,ndf_chi,nqp_h,nqp_v), intent(in) :: diff_basis_chi
@@ -143,7 +143,7 @@ subroutine weighted_m3_code(cell, nlayers, ncell_3d,            &
                              ipanel, basis_chi, diff_basis_chi, jac, dj)
 
     ik = 1 + k + (cell-1)*nlayers
-    mm(:,:,ik) = 0.0_r_def
+    mm(ik,:,:) = 0.0_r_def
     do qp2 = 1, nqp_v
       do qp1 = 1, nqp_h
         rho_quad = 0.0_r_def
@@ -153,7 +153,7 @@ subroutine weighted_m3_code(cell, nlayers, ncell_3d,            &
         integrand = wqp_h(qp1)*wqp_v(qp2)*scalar/rho_quad*dj(qp1,qp2)
         do df2 = 1, ndf_w3
           do df1 = 1, ndf_w3
-            mm(df1,df2,ik) = mm(df1,df2,ik)                    &
+            mm(ik,df1,df2) = mm(ik,df1,df2)                    &
                            + integrand*basis_w3(1,df1,qp1,qp2) &
                                       *basis_w3(1,df2,qp1,qp2)
           end do

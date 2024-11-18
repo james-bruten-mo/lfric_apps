@@ -95,7 +95,7 @@ contains
     integer(kind=i_def), parameter :: undf_wx = ndf_wx
     integer(kind=i_def), parameter :: undf_p  = ndf_p
     ! Operators to test
-    real(kind=r_solver), dimension(ndf_w2,ndf_w2,ncell) :: q22
+    real(kind=r_solver), dimension(ncell,ndf_w2,ndf_w2) :: q22
     ! Maps
     integer(kind=i_def), dimension(ndf_wx) :: map_wx
     integer(kind=i_def), dimension(ndf_w2) :: map_w2
@@ -211,10 +211,10 @@ contains
     if ( r_solver == real64 ) then
       use_tol = tol
     else
-      use_tol = max( 1.0E-7_r_solver, 10.0_r_solver*spacing( maxval( q22(:,:,1) ) ) )
+      use_tol = max( 1.0E-7_r_solver, 10.0_r_solver*spacing( maxval( q22(1,:,:) ) ) )
     end if
 
-    @assertEqual(answer, q22(:,:,1), use_tol)
+    @assertEqual(answer, q22(1,:,:), use_tol)
 
   end subroutine test_all
 

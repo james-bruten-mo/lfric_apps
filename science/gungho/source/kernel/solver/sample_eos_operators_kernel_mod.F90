@@ -106,9 +106,9 @@ subroutine sample_eos_operators_code(cell, nlayers,                      &
   integer(kind=i_def), dimension(ndf_w3),  intent(in) :: map_w3
   integer(kind=i_def), dimension(ndf_wt),  intent(in) :: map_wt
 
-  real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell_3d1),  intent(inout)  :: m3exner
-  real(kind=r_solver), dimension(ndf_w3,ndf_w3,ncell_3d2),  intent(inout)  :: m3rho
-  real(kind=r_solver), dimension(ndf_w3,ndf_wt,ncell_3d3),  intent(inout)  :: p3theta
+  real(kind=r_solver), dimension(ncell_3d1,ndf_w3,ndf_w3),  intent(inout)  :: m3exner
+  real(kind=r_solver), dimension(ncell_3d2,ndf_w3,ndf_w3),  intent(inout)  :: m3rho
+  real(kind=r_solver), dimension(ncell_3d3,ndf_w3,ndf_wt),  intent(inout)  :: p3theta
 
   real(kind=r_def), dimension(1,ndf_w3,ndf_w3),  intent(in) :: basis_w3
   real(kind=r_def), dimension(1,ndf_wt,ndf_w3),  intent(in) :: basis_wt
@@ -133,9 +133,9 @@ subroutine sample_eos_operators_code(cell, nlayers,                      &
 
   do k = 0, nlayers-1
     ik = 1 + k + (cell-1)*nlayers
-    m3exner(:,:,ik) = 0.0_r_solver
-    m3rho(:,:,ik)   = 0.0_r_solver
-    p3theta(:,:,ik) = 0.0_r_solver
+    m3exner(ik,:,:) = 0.0_r_solver
+    m3rho(ik,:,:)   = 0.0_r_solver
+    p3theta(ik,:,:) = 0.0_r_solver
     do df = 1, ndf_w3
       exner_cell = 0.0_r_solver
       rho_cell = 0.0_r_solver
@@ -150,16 +150,16 @@ subroutine sample_eos_operators_code(cell, nlayers,                      &
       end do
 
       do df3 = 1, ndf_w3
-        m3exner(df,df3,ik) = m3exner(df,df3,ik)              &
+        m3exner(ik,df,df3) = m3exner(ik,df,df3)              &
                              + onemk_over_k*          &
                              (p0_over_rd * exner_cell**onemk_over_k &
                               /(rho_cell*theta_cell))*rsol_basis_w3(1,df3,df)/exner_cell
-        m3rho(df,df3,ik) = m3rho(df,df3,ik)                          &
+        m3rho(ik,df,df3) = m3rho(ik,df,df3)                          &
                            + rsol_basis_w3(1,df3,df)/rho_cell
       end do
 
       do dft = 1, ndf_wt
-        p3theta(df,dft,ik) = p3theta(df,dft,ik)                &
+        p3theta(ik,df,dft) = p3theta(ik,df,dft)                &
                              + rsol_basis_wt(1,dft,df)/theta_cell
       end do
 
