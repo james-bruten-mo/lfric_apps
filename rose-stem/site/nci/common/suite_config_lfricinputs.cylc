@@ -1,6 +1,6 @@
 {% do LOG.debug("Entered site/nci/common/suite_config_lfricinputs.cylc") %}
 
-{% set gadi_base = 'module load /g/data/access/ngm/modules/envs/lfric/202404/intel-openmpi' %}
+{% set gadi_base = 'module load /g/data/access/ngm/modules/envs/lfric/202412/intel-openmpi' %}
 
     [[LFRICINPUTS_BASE]]
         execution retry delays = 2*PT1M
@@ -57,7 +57,7 @@
                      module use /g/data/access/ngm/modules
                      module use /g/data/access/projects/access/modules
                      module use /g/data/hr22/modulefiles
-                     module load /g/data/access/ngm/modules/envs/lfric/202404/intel-openmpi
+                     module load /g/data/access/ngm/modules/envs/lfric/202412/intel-openmpi
                      module list 2>&1
                      """
         post-script = """
