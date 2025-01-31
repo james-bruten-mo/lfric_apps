@@ -101,6 +101,12 @@
       <field field_ref="radiation__sw_up_surf_rts"/>
       <field field_ref="radiation__sw_up_toa_rts"/>
       <field field_ref="radiation__sw_direct_toa_rts"/>
+      <field field_ref="radiation__sw_down_uv_surf_rts"/>
+      <field field_ref="radiation__sw_direct_uv_surf_rts"/>
+      <field field_ref="radiation__sw_up_uv_surf_rts"/>
+      <field field_ref="radiation__sw_down_uv_clear_surf_rts"/>
+      <field field_ref="radiation__sw_direct_uv_clear_surf_rts"/>
+      <field field_ref="radiation__sw_up_uv_clear_surf_rts"/>
       <field field_ref="radiation__lw_down_clear_surf_rts"/>
       <field field_ref="radiation__lw_up_clear_surf_rts"/>
       <field field_ref="radiation__lw_up_clear_toa_rts"/>
@@ -144,7 +150,7 @@
       <field field_ref="orographic_drag__dvdt_orographic_drag"/>
     </field_group>
 
-    <!-- Half level diagnostics on radiation timesteps -->
+    <!-- Full level diagnostics on radiation timesteps -->
     <field_group operation="average" freq_op="1h" freq_offset="0ts">
       <field field_ref="radiation__liq_cloud_mmr_rts"/>
       <field field_ref="radiation__ice_cloud_mmr_rts"/>

@@ -670,17 +670,35 @@
   <field id="radiation__sw_diffuse_surf_rts" name="sw_diffuse_surf_rts" long_name="surface_diffuse_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_down_blue_surf_rts" name="sw_down_blue_surf_rts" long_name="surface_downward_0-690nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_direct_blue_surf_rts" name="sw_direct_blue_surf_rts" long_name="surface_direct_0-690nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_down_uv_surf_rts" name="sw_down_uv_surf_rts" long_name="surface_downward_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_direct_uv_surf_rts" name="sw_direct_uv_surf_rts" long_name="surface_direct_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_uv_surf_rts" name="sw_up_uv_surf_rts" long_name="surface_upward_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_down_uv_clear_surf_rts" name="sw_down_uv_clear_surf_rts" long_name="surface_downward_clear_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_direct_uv_clear_surf_rts" name="sw_direct_uv_clear_surf_rts" long_name="surface_direct_clear_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_uv_clear_surf_rts" name="sw_up_uv_clear_surf_rts" long_name="surface_upward_clear_0-320nm_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_up_surf_rts" name="sw_up_surf_rts" long_name="surface_upward_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_net_surf_rts" name="sw_net_surf_rts" long_name="surface_net_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_up_clear_toa_rts" name="sw_up_clear_toa_rts" long_name="toa_upward_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_down_clear_surf_rts" name="sw_down_clear_surf_rts" long_name="surface_downward_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_up_clear_surf_rts" name="sw_up_clear_surf_rts" long_name="surface_upward_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_clean_toa_rts" name="sw_up_clean_toa_rts" long_name="toa_upward_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_down_clean_surf_rts" name="sw_down_clean_surf_rts" long_name="surface_downward_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_clean_surf_rts" name="sw_up_clean_surf_rts" long_name="surface_upward_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_clear_clean_toa_rts" name="sw_up_clear_clean_toa_rts" long_name="toa_upward_clear_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_down_clear_clean_surf_rts" name="sw_down_clear_clean_surf_rts" long_name="surface_downward_clear_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__sw_up_clear_clean_surf_rts" name="sw_up_clear_clean_surf_rts" long_name="surface_upward_clear_clean_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__sw_direct_rts" name="sw_direct_rts" long_name="direct_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__sw_down_rts" name="sw_down_rts" long_name="downward_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__sw_up_rts" name="sw_up_rts" long_name="upward_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__sw_direct_clear_rts" name="sw_direct_clear_rts" long_name="direct_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__sw_down_clear_rts" name="sw_down_clear_rts" long_name="downward_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__sw_up_clear_rts" name="sw_up_clear_rts" long_name="upward_clear_shortwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
+  <field id="radiation__sw_direct_band_rts" name="sw_direct_band_rts" long_name="direct_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
+  <field id="radiation__sw_down_band_rts" name="sw_down_band_rts" long_name="downward_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
+  <field id="radiation__sw_up_band_rts" name="sw_up_band_rts" long_name="upward_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
+  <field id="radiation__sw_direct_clear_band_rts" name="sw_direct_clear_band_rts" long_name="direct_clear_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
+  <field id="radiation__sw_down_clear_band_rts" name="sw_down_clear_band_rts" long_name="downward_clear_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
+  <field id="radiation__sw_up_clear_band_rts" name="sw_up_clear_band_rts" long_name="upward_clear_shortwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="sw_bands_radiation_levels" />
   <field id="radiation__lw_up_toa_rts" name="lw_up_toa_rts" long_name="toa_upward_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__lw_down_surf_rts" name="lw_down_surf_rts" long_name="surface_downward_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__lw_up_surf_rts" name="lw_up_surf_rts" long_name="surface_upward_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
@@ -688,10 +706,21 @@
   <field id="radiation__lw_up_clear_toa_rts" name="lw_up_clear_toa_rts" long_name="toa_upward_clear_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__lw_down_clear_surf_rts" name="lw_down_clear_surf_rts" long_name="surface_downward_clear_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__lw_up_clear_surf_rts" name="lw_up_clear_surf_rts" long_name="surface_upward_clear_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_up_clean_toa_rts" name="lw_up_clean_toa_rts" long_name="toa_upward_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_down_clean_surf_rts" name="lw_down_clean_surf_rts" long_name="surface_downward_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_up_clean_surf_rts" name="lw_up_clean_surf_rts" long_name="surface_upward_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_up_clear_clean_toa_rts" name="lw_up_clear_clean_toa_rts" long_name="toa_upward_clear_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_down_clear_clean_surf_rts" name="lw_down_clear_clean_surf_rts" long_name="surface_downward_clear_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
+  <field id="radiation__lw_up_clear_clean_surf_rts" name="lw_up_clear_clean_surf_rts" long_name="surface_upward_clear_clean_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" />
   <field id="radiation__lw_down_rts" name="lw_down_rts" long_name="downward_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__lw_up_rts" name="lw_up_rts" long_name="upward_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__lw_down_clear_rts" name="lw_down_clear_rts" long_name="downward_clear_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
   <field id="radiation__lw_up_clear_rts" name="lw_up_clear_rts" long_name="upward_clear_longwave_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="radiation_levels" />
+  <field id="radiation__lw_down_band_rts" name="lw_down_band_rts" long_name="downward_longwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="lw_bands_radiation_levels" />
+  <field id="radiation__lw_up_band_rts" name="lw_up_band_rts" long_name="upward_longwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="lw_bands_radiation_levels" />
+  <field id="radiation__lw_down_clear_band_rts" name="lw_down_clear_band_rts" long_name="downward_clear_longwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="lw_bands_radiation_levels" />
+  <field id="radiation__lw_up_clear_band_rts" name="lw_up_clear_band_rts" long_name="upward_clear_longwave_band_flux_radiative_timestep" unit="W m-2" domain_ref="face" axis_ref="lw_bands_radiation_levels" />
+  <field id="radiation__photolysis_rates_rts" name="photolysis_rates_rts" long_name="photolysis_rates_radiative_timestep" unit="s-1"  grid_ref="full_level_face_grid_photolysis_pathways" />
   <field id="radiation__cloud_cover_rts" name="cloud_cover_rts" long_name="total_column_cloud_fraction_radiative_timestep" unit="1" domain_ref="face" />
   <field id="radiation__cloud_fraction_rts" name="cloud_fraction_rts" long_name="total_cloud_fraction_radiative_timestep" unit="1" grid_ref="full_level_face_grid" />
   <field id="radiation__cloud_droplet_re_rts" name="cloud_droplet_re_rts" long_name="cloud_droplet_effective_radius_radiative_timestep" unit="m" grid_ref="full_level_face_grid" />
@@ -716,14 +745,14 @@
   <field id="radiation__cloud_weight_extinction_rts" name="cloud_weight_extinction_rts" long_name="weight_for_cloud_extinction_radiative_timestep" unit="1" grid_ref="full_level_face_grid" />
   <field id="radiation__sw_aer_optical_depth_rts" name="sw_aer_optical_depth_rts" long_name="aerosol_optical_depth_in_visible_radiative_timestep" unit="1" grid_ref="full_level_face_grid" />
   <field id="radiation__lw_aer_optical_depth_rts" name="lw_aer_optical_depth_rts" long_name="aerosol_optical_depth_in_infra-red_radiative_timestep" unit="1" grid_ref="full_level_face_grid" />
-  <field id="radiation__aer_mix_ratio" name="aer_mix_ratio" long_name="aerosol_mixing_ratio" unit="kg kg-1" grid_ref="aero_mode_grid" />
-  <field id="radiation__aer_sw_abs" name="aer_sw_abs" long_name="aer_sw_absorption" unit="m2/kg" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
-  <field id="radiation__aer_sw_sca" name="aer_sw_sca" long_name="aer_sw_scattering" unit="m2/kg" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
-  <field id="radiation__aer_sw_asy"  name="aer_sw_asy"  long_name="aer_sw_asymmetry" unit="1" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
-  <field id="radiation__aer_lw_abs" name="aer_lw_abs" long_name="aer_lw_absorption" unit="m2/kg" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
-  <field id="radiation__aer_lw_sca" name="aer_lw_sca" long_name="aer_lw_scattering" unit="m2/kg" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
-  <field id="radiation__aer_lw_asy"  name="aer_lw_asy"  long_name="aer_lw_asymmetry" unit="1" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
   <!-- radiation diagnostics: inputs to radiation on radiation timesteps -->
+  <field id="radiation__aer_mix_ratio_radinput" name="aer_mix_ratio_radinput" long_name="aerosol_mode_mixing_ratios" unit="kg kg-1" grid_ref="aero_mode_grid" />
+  <field id="radiation__aer_sw_abs_radinput" name="aer_sw_abs_radinput" long_name="aerosol_mode_sw_band_absorption" unit="m2/kg" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
+  <field id="radiation__aer_sw_sca_radinput" name="aer_sw_sca_radinput" long_name="aerosol_mode_sw_band_scattering" unit="m2/kg" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
+  <field id="radiation__aer_sw_asy_radinput"  name="aer_sw_asy_radinput"  long_name="aerosol_mode_sw_band_asymmetry" unit="1" grid_ref="full_level_face_grid_sw_bands_aero_modes" /> 
+  <field id="radiation__aer_lw_abs_radinput" name="aer_lw_abs_radinput" long_name="aerosol_mode_lw_band_absorption" unit="m2/kg" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
+  <field id="radiation__aer_lw_sca_radinput" name="aer_lw_sca_radinput" long_name="aerosol_mode_lw_band_scattering" unit="m2/kg" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
+  <field id="radiation__aer_lw_asy_radinput"  name="aer_lw_asy_radinput"  long_name="aerosol_mode_lw_band_asymmetry" unit="1" grid_ref="full_level_face_grid_lw_bands_aero_modes" /> 
   <field id="radiation__pressure_in_layers_radinput" name="pressure_in_layers_radinput" long_name="pressure_in_radiation_layers" unit="Pa" grid_ref="full_level_face_grid" />
   <field id="radiation__temperature_in_layers_radinput" name="temperature_in_layers_radinput" long_name="temperature_in_radiation_layers" unit="K" grid_ref="full_level_face_grid" />
   <field id="radiation__dry_mass_in_layers_radinput" name="dry_mass_in_layers_radinput" long_name="dry_mass_in_radiation_layers" unit="kg m-2" grid_ref="full_level_face_grid" />
@@ -749,6 +778,7 @@
   <field id="radiation__conv_liquid_mmr_radinput" name="conv_liquid_mmr_radinput" long_name="convective_cloud_liquid_mass_mixing_ratio_in_radiation_layers" unit="kg kg-1" grid_ref="full_level_face_grid" />
   <field id="radiation__conv_frozen_mmr_radinput" name="conv_frozen_mmr_radinput" long_name="convective_cloud_frozen_mass_mixing_ratio_in_radiation_layers" unit="kg kg-1" grid_ref="full_level_face_grid" />
   <field id="radiation__sigma_condensate_radinput" name="sigma_condensate_radinput" long_name="relative_standard_deviation_of_condensate_mmr_in_radiation_layers" unit="1" grid_ref="full_level_face_grid" />
+  <field id="radiation__rand_seed_real_radinput" name="rand_seed_real_radinput" long_name="random_seed_for_subgrid_cloud_generator" unit="1" domain_ref="face" />
   <field id="radiation__layer_heat_capacity_radinput" name="layer_heat_capacity_radinput" long_name="heat_capacity_of_total_mass_in_radiation_layers" unit="J m-2 K-1" grid_ref="full_level_face_grid" />
   <field id="radiation__sulphuric_aerosol_radinput" name="sulphuric_aerosol_radinput" long_name="sulphuric_aerosol_mass_mixing_ratio_in_radiation_layers" unit="m2/kg" grid_ref="full_level_face_grid" />
   <!-- COSP diagnostics -->

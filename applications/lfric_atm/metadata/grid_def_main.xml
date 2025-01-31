@@ -31,6 +31,11 @@
     <axis axis_ref="vert_axis_full_levels"/>
     <axis axis_ref="lw_bands_aero_modes"/>
   </grid>
+  <grid id="full_level_face_grid_photolysis_pathways">
+    <domain domain_ref="face"/>
+    <axis axis_ref="vert_axis_full_levels"/>
+    <axis axis_ref="photolysis_pathways"/>
+  </grid>
   <grid id="3D_monthly_grid">
     <domain domain_ref="face"/>
     <axis axis_ref="vert_axis_full_levels"/>

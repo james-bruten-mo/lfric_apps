@@ -37,6 +37,8 @@ real(r_def), allocatable, target :: &
 real(r_def), allocatable, target :: &
   lwinc_wavelength_short(:), lwinc_wavelength_long(:)
 
+integer(i_def) :: n_pathway, sw_550nm, lw_11um
+
 integer(i_def) :: i_scatter_method_lw, i_scatter_method_lwinc
 integer(i_def) :: i_cloud_representation, i_overlap, i_inhom, i_inhom_inc
 integer(i_def) :: i_cloud_entrapment
@@ -55,6 +57,7 @@ public :: socrates_init, &
   swinc_wavelength_short, swinc_wavelength_long, swinc_weight_blue, &
   n_lwinc_band, lwinc_n_band_exclude, lwinc_index_exclude, &
   lwinc_wavelength_short, lwinc_wavelength_long, &
+  n_pathway, sw_550nm, lw_11um, &
   i_scatter_method_lw, i_scatter_method_lwinc, &
   i_cloud_representation, i_overlap, i_inhom, i_inhom_inc, &
   i_cloud_entrapment, i_drop_re, l_orog
@@ -126,7 +129,8 @@ subroutine socrates_init()
     ip_inhom_tripleclouds_2019, &
     ip_cloud_entrapment_max, ip_cloud_entrapment_zero, &
     ip_droplet_re_default, ip_droplet_re_constant, ip_droplet_re_liu
-  use socrates_set_spectrum, only: set_spectrum, get_spectrum, set_mcica
+  use socrates_set_spectrum, only: &
+    set_spectrum, get_spectrum, get_spectral_band, set_mcica
   use log_mod, only: log_event, log_scratch_space, LOG_LEVEL_INFO
 
   implicit none
@@ -267,7 +271,12 @@ subroutine socrates_init()
     index_exclude    = sw_index_exclude,    &
     wavelength_short = sw_wavelength_short, &
     wavelength_long  = sw_wavelength_long,  &
-    weight_blue      = sw_weight_blue )
+    weight_blue      = sw_weight_blue,      &
+    n_pathway        = n_pathway )
+
+  sw_550nm = get_spectral_band(             &
+    wavelength       = 550.0e-9_r_def,      &
+    spectrum_name    = 'sw' )
 
   call log_event( 'SW bands:', LOG_LEVEL_INFO )
   do i_band=1, n_sw_band
@@ -304,6 +313,10 @@ subroutine socrates_init()
     index_exclude    = lw_index_exclude,    &
     wavelength_short = lw_wavelength_short, &
     wavelength_long  = lw_wavelength_long )
+
+  lw_11um = get_spectral_band(              &
+    wavelength       = 11.0e-6_r_def,       &
+    spectrum_name    = 'lw' )
 
   call log_event( 'LW bands:', LOG_LEVEL_INFO )
   do i_band=1, n_lw_band

@@ -21,7 +21,7 @@ module multidata_field_dimensions_mod
 #ifdef UM_PHYSICS
       !                   1         2         3
       !          123456789012345678901234567890
-      character(30), parameter :: multidata_items(27) = &
+      character(30), parameter :: multidata_items(30) = &
             [character(30) ::                           &
                 'plant_func_types',                     &
                 'sea_ice_categories',                   &
@@ -49,7 +49,10 @@ module multidata_field_dimensions_mod
                 'sw_bands',                             &
                 'lw_bands',                             &
                 'sw_bands_surface_tiles',               &
-                'lw_bands_surface_tiles'                &
+                'lw_bands_surface_tiles',               &
+                'sw_bands_radiation_levels',            &
+                'lw_bands_radiation_levels',            &
+                'photolysis_pathways'                   &
       ]
 #endif
 
@@ -107,7 +110,7 @@ end subroutine sync_multidata_field_dimensions
     use nlsizes_namelist_mod,    only: sm_levels
     use ancil_info,              only: rad_nband
     use um_physics_init_mod,     only: sw_band_mode, lw_band_mode, mode_dimen
-    use socrates_init_mod,       only: n_sw_band, n_lw_band
+    use socrates_init_mod,       only: n_sw_band, n_lw_band, n_pathway
     use dust_parameters_mod,     only: ndiv
     use extrusion_config_mod,    only: number_of_layers
     use cosp_config_mod,         only: n_subcol_gen
@@ -181,6 +184,15 @@ end subroutine sync_multidata_field_dimensions
             if (radiation == radiation_none) dim = 1
       case ('sw_bands_surface_tiles')
             dim = n_sw_band*n_surf_tile
+            if (radiation == radiation_none) dim = 1
+      case ('sw_bands_radiation_levels')
+            dim = n_sw_band*(number_of_layers+1)
+            if (radiation == radiation_none) dim = 1
+      case ('lw_bands_radiation_levels')
+            dim = n_lw_band*(number_of_layers+1)
+            if (radiation == radiation_none) dim = 1
+      case ('photolysis_pathways')
+            dim = n_pathway
             if (radiation == radiation_none) dim = 1
       case ('cloud_subcols')
             dim = n_subcol_gen

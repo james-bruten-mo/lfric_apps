@@ -251,6 +251,8 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
   type( field_type ) :: &
     lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
     sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    lw_down_band_rts, lw_up_band_rts, &
     cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
     cloud_top_re_rts, cloud_top_weight_rts, &
     warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -264,8 +266,19 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
     sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
     sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
     lw_down_clear_rts, lw_up_clear_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts, &
     sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+    photolysis_rates_rts
 
   call log_event( 'slow_physics: Running Radiation', LOG_LEVEL_DEBUG )
 
@@ -391,6 +404,8 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
   call initialise_diags_for_radiation(lw_down_surf, lw_heating_rate, &
     lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
     sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    lw_down_band_rts, lw_up_band_rts, &
     cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
     cloud_top_re_rts, cloud_top_weight_rts, &
     warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -404,8 +419,19 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
     sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
     sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
     lw_down_clear_rts, lw_up_clear_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts, &
     sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts)
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+    photolysis_rates_rts)
 
   if (rad_this_tstep .or. rad_inc_this_tstep ) then
 
@@ -470,36 +496,44 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
     ! Radiation time-step: full calculation of SW fluxes
     ! --------------------------------------------------
     call log_event( 'Radiation timestep', LOG_LEVEL_INFO )
-    call invoke( sw_kernel_type(                                    &
-      sw_heating_rate_rts, sw_down_surf_rts, sw_direct_surf_rts,    &
-      sw_down_blue_surf_rts, sw_direct_blue_surf_rts,               &
-      sw_up_surf_rts, sw_up_toa_rts, sw_direct_toa_rts,             &
-      sw_up_tile_rts, sw_up_blue_tile_rts,                          &
-      rho_in_wth, pressure_in_wth, temperature_in_wth,              &
-      d_mass, layer_heat_capacity,                                  &
-      cos_zenith_angle_rts, lit_fraction_rts,                       &
-      stellar_irradiance_rts, orographic_correction_rts,            &
-      h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn,    &
-      mr(imr_cl), mr_ice, n_ice,                                    &
-      conv_liquid_mmr, conv_frozen_mmr,                             &
-      radiative_cloud_fraction, radiative_conv_fraction,            &
-      liquid_fraction, frozen_fraction,                             &
-      conv_liquid_fraction, conv_frozen_fraction,                   &
-      sigma_mc, cloud_drop_no_conc,                                 &
-      rand_seed, n_cloud_layer,                                     &
-      tile_fraction,                                                &
-      tile_sw_direct_albedo, tile_sw_diffuse_albedo,                &
-      sulphuric, aer_mix_ratio,                                     &
-      aer_sw_absorption, aer_sw_scattering, aer_sw_asymmetry,       &
+    call invoke( sw_kernel_type( &
+      sw_heating_rate_rts, sw_down_surf_rts, sw_direct_surf_rts, &
+      sw_down_blue_surf_rts, sw_direct_blue_surf_rts, &
+      sw_up_surf_rts, sw_up_toa_rts, sw_direct_toa_rts, &
+      sw_up_tile_rts, sw_up_blue_tile_rts, &
+      rho_in_wth, pressure_in_wth, temperature_in_wth, &
+      d_mass, layer_heat_capacity, &
+      cos_zenith_angle_rts, lit_fraction_rts, &
+      stellar_irradiance_rts, orographic_correction_rts, &
+      h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn, &
+      mr(imr_cl), mr_ice, n_ice, &
+      conv_liquid_mmr, conv_frozen_mmr, &
+      radiative_cloud_fraction, radiative_conv_fraction, &
+      liquid_fraction, frozen_fraction, &
+      conv_liquid_fraction, conv_frozen_fraction, &
+      sigma_mc, cloud_drop_no_conc, &
+      rand_seed, n_cloud_layer, &
+      tile_fraction, &
+      tile_sw_direct_albedo, tile_sw_diffuse_albedo, &
+      sulphuric, aer_mix_ratio, &
+      aer_sw_absorption, aer_sw_scattering, aer_sw_asymmetry, &
       ! Conditional diagnostics
-      cloud_top_re_rts, cloud_top_weight_rts,                       &
-      warm_cloud_top_re_rts, warm_cloud_top_weight_rts,             &
-      cloud_extinction_rts, cloud_weight_extinction_rts,            &
-      sw_aer_optical_depth_rts,                                     &
-      sw_direct_rts, sw_down_rts, sw_up_rts,                        &
-      sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts,      &
-      sw_down_clear_surf_rts, sw_up_clear_surf_rts,                 &
-      sw_up_clear_toa_rts ) )
+      cloud_top_re_rts, cloud_top_weight_rts, &
+      warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
+      cloud_extinction_rts, cloud_weight_extinction_rts, &
+      sw_aer_optical_depth_rts, &
+      sw_direct_rts, sw_down_rts, sw_up_rts, &
+      sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
+      sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+      sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+      sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
+      sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+      sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+      sw_up_clear_clean_toa_rts, &
+      sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+      sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+      sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+      photolysis_rates_rts ) )
   end if
   if (rad_inc_this_tstep) then
     ! --------------------------------------------------------------
@@ -565,35 +599,39 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
     ! --------------------------------------------------
     ! Radiation time-step: full calculation of LW fluxes
     ! --------------------------------------------------
-    call invoke( lw_kernel_type(                                 &
-      lw_heating_rate_rts, lw_down_surf_rts, lw_up_surf_rts,     &
-      lw_up_toa_rts, lw_up_tile_rts,                             &
-      rho_in_wth, pressure_in_wth, temperature_in_wth,           &
-      t_layer_boundaries, d_mass, layer_heat_capacity,           &
+    call invoke( lw_kernel_type( &
+      lw_heating_rate_rts, lw_down_surf_rts, lw_up_surf_rts, &
+      lw_up_toa_rts, lw_up_tile_rts, &
+      rho_in_wth, pressure_in_wth, temperature_in_wth, &
+      t_layer_boundaries, d_mass, layer_heat_capacity, &
       h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn, &
-      mr(imr_cl), mr_ice, n_ice,                                 &
-      conv_liquid_mmr, conv_frozen_mmr,                          &
-      radiative_cloud_fraction, radiative_conv_fraction,         &
-      liquid_fraction, frozen_fraction,                          &
-      conv_liquid_fraction, conv_frozen_fraction,                &
-      sigma_mc, cloud_drop_no_conc,                              &
-      rand_seed, n_cloud_layer,                                  &
-      tile_fraction, tile_temperature, tile_lw_albedo,           &
-      sulphuric, aer_mix_ratio,                                  &
-      aer_lw_absorption, aer_lw_scattering, aer_lw_asymmetry,    &
+      mr(imr_cl), mr_ice, n_ice, &
+      conv_liquid_mmr, conv_frozen_mmr, &
+      radiative_cloud_fraction, radiative_conv_fraction, &
+      liquid_fraction, frozen_fraction, &
+      conv_liquid_fraction, conv_frozen_fraction, &
+      sigma_mc, cloud_drop_no_conc, &
+      rand_seed, n_cloud_layer, &
+      tile_fraction, tile_temperature, tile_lw_albedo, &
+      sulphuric, aer_mix_ratio, &
+      aer_lw_absorption, aer_lw_scattering, aer_lw_asymmetry, &
       ! Conditional diagnostics
       cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
-      liq_cloud_frac_rts, liq_conv_frac_rts,                     &
-      ice_cloud_frac_rts, ice_conv_frac_rts,                     &
-      liq_cloud_mmr_rts, liq_conv_mmr_rts,                       &
-      ice_cloud_mmr_rts, ice_conv_mmr_rts,                       &
-      liq_cloud_path_rts, ice_cloud_path_rts,                    &
-      cloud_absorptivity_rts, cloud_weight_absorptivity_rts,     &
-      lw_aer_optical_depth_rts,                                  &
-      lw_down_rts, lw_up_rts,                                    &
-      lw_down_clear_rts, lw_up_clear_rts,                        &
-      lw_down_clear_surf_rts, lw_up_clear_surf_rts,              &
-      lw_up_clear_toa_rts ) )
+      liq_cloud_frac_rts, liq_conv_frac_rts, &
+      ice_cloud_frac_rts, ice_conv_frac_rts, &
+      liq_cloud_mmr_rts, liq_conv_mmr_rts, &
+      ice_cloud_mmr_rts, ice_conv_mmr_rts, &
+      liq_cloud_path_rts, ice_cloud_path_rts, &
+      cloud_absorptivity_rts, cloud_weight_absorptivity_rts, &
+      lw_aer_optical_depth_rts, &
+      lw_down_rts, lw_up_rts, &
+      lw_down_clear_rts, lw_up_clear_rts, &
+      lw_down_band_rts, lw_up_band_rts, &
+      lw_down_clear_band_rts, lw_up_clear_band_rts, &
+      lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+      lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+      lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+      lw_up_clear_clean_toa_rts ) )
   end if
   if (rad_inc_this_tstep) then
     ! --------------------------------------------------------------
@@ -670,10 +708,12 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
       radiative_cloud_fraction, liquid_fraction, frozen_fraction, &
       mr(imr_cl), mr_ice, n_ice, cloud_drop_no_conc, &
       radiative_conv_fraction, conv_liquid_fraction, conv_frozen_fraction, &
-      conv_liquid_mmr, conv_frozen_mmr, sigma_mc, &
+      conv_liquid_mmr, conv_frozen_mmr, sigma_mc, rand_seed, &
       layer_heat_capacity, sulphuric, &
       lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
       sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+      sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+      lw_down_band_rts, lw_up_band_rts, &
       cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
       cloud_top_re_rts, cloud_top_weight_rts, &
       warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -687,8 +727,19 @@ subroutine radiation_alg(dtheta_rad, theta, exner, mr, moist_dyn,             &
       sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
       sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
       lw_down_clear_rts, lw_up_clear_rts, &
+      sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+      lw_down_clear_band_rts, lw_up_clear_band_rts, &
       sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-      lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts )
+      lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+      sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+      lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+      sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+      lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+      sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+      sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+      sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+      sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+      photolysis_rates_rts )
   end if
 
   nullify ( mesh, twod_mesh )

@@ -93,6 +93,12 @@ sw_up_rts = ['sw_up_rts', 0, 600]
 sw_up_clear_toa_rts = ['sw_up_clear_toa_rts', 0, 600]
 sw_down_clear_surf_rts = ['sw_down_clear_surf_rts', 0, 1400]
 sw_up_clear_surf_rts = ['sw_up_clear_surf_rts', 0, 600]
+sw_down_uv_surf_rts = ['sw_down_uv_surf_rts', 0, 1.2]
+sw_direct_uv_surf_rts = ['sw_direct_uv_surf_rts', 0, 0.36]
+sw_up_uv_surf_rts = ['sw_up_uv_surf_rts', 0, 0.16]
+sw_down_uv_clear_surf_rts = ['sw_down_uv_clear_surf_rts', 0, 1.2]
+sw_direct_uv_clear_surf_rts = ['sw_direct_uv_clear_surf_rts', 0, 0.36]
+sw_up_uv_clear_surf_rts = ['sw_up_uv_clear_surf_rts', 0, 0.16]
 lw_net_surf_rts = ['lw_net_surf_rts', -300, 100]
 lw_up_toa_rts = ['lw_up_toa_rts', 100, 400]
 lw_up_clear_toa_rts = ['lw_up_clear_toa_rts', 100, 400]
@@ -248,6 +254,12 @@ if __name__ == "__main__":
         do_plot(datapath, sw_up_clear_toa_rts,    plotpath)
         do_plot(datapath, sw_down_clear_surf_rts, plotpath)
         do_plot(datapath, sw_up_clear_surf_rts,   plotpath)
+        do_plot(datapath, sw_down_uv_surf_rts,    plotpath)
+        do_plot(datapath, sw_direct_uv_surf_rts,  plotpath)
+        do_plot(datapath, sw_up_uv_surf_rts,      plotpath)
+        do_plot(datapath, sw_down_uv_clear_surf_rts, plotpath)
+        do_plot(datapath, sw_direct_uv_clear_surf_rts, plotpath)
+        do_plot(datapath, sw_up_uv_clear_surf_rts, plotpath)
         do_plot(datapath, lw_net_surf_rts,        plotpath)
         do_plot(datapath, lw_up_toa_rts,          plotpath)
         do_plot(datapath, lw_up_clear_toa_rts,    plotpath)

@@ -9,6 +9,7 @@ module radiation_diags_mod
 
   use constants_mod,            only: i_def, l_def, r_def
   use field_mod,                only: field_type
+  use integer_field_mod,        only: integer_field_type
   use io_config_mod,            only: subroutine_timers
   use timer_mod,                only: timer
   use timestepping_config_mod,  only: dt
@@ -53,17 +54,46 @@ module radiation_diags_mod
   logical( l_def ) :: sw_up_clear_rts_flag
   logical( l_def ) :: lw_down_clear_rts_flag
   logical( l_def ) :: lw_up_clear_rts_flag
+  logical( l_def ) :: sw_direct_band_rts_flag
+  logical( l_def ) :: sw_down_band_rts_flag
+  logical( l_def ) :: sw_up_band_rts_flag
+  logical( l_def ) :: lw_down_band_rts_flag
+  logical( l_def ) :: lw_up_band_rts_flag
+  logical( l_def ) :: sw_direct_clear_band_rts_flag
+  logical( l_def ) :: sw_down_clear_band_rts_flag
+  logical( l_def ) :: sw_up_clear_band_rts_flag
+  logical( l_def ) :: lw_down_clear_band_rts_flag
+  logical( l_def ) :: lw_up_clear_band_rts_flag
   logical( l_def ) :: sw_down_clear_surf_rts_flag
   logical( l_def ) :: sw_up_clear_surf_rts_flag
   logical( l_def ) :: sw_up_clear_toa_rts_flag
   logical( l_def ) :: lw_down_clear_surf_rts_flag
   logical( l_def ) :: lw_up_clear_surf_rts_flag
   logical( l_def ) :: lw_up_clear_toa_rts_flag
+  logical( l_def ) :: sw_down_clean_surf_rts_flag
+  logical( l_def ) :: sw_up_clean_surf_rts_flag
+  logical( l_def ) :: sw_up_clean_toa_rts_flag
+  logical( l_def ) :: lw_down_clean_surf_rts_flag
+  logical( l_def ) :: lw_up_clean_surf_rts_flag
+  logical( l_def ) :: lw_up_clean_toa_rts_flag
+  logical( l_def ) :: sw_down_clear_clean_surf_rts_flag
+  logical( l_def ) :: sw_up_clear_clean_surf_rts_flag
+  logical( l_def ) :: sw_up_clear_clean_toa_rts_flag
+  logical( l_def ) :: lw_down_clear_clean_surf_rts_flag
+  logical( l_def ) :: lw_up_clear_clean_surf_rts_flag
+  logical( l_def ) :: lw_up_clear_clean_toa_rts_flag
+  logical( l_def ) :: sw_down_uv_surf_rts_flag
+  logical( l_def ) :: sw_direct_uv_surf_rts_flag
+  logical( l_def ) :: sw_up_uv_surf_rts_flag
+  logical( l_def ) :: sw_down_uv_clear_surf_rts_flag
+  logical( l_def ) :: sw_direct_uv_clear_surf_rts_flag
+  logical( l_def ) :: sw_up_uv_clear_surf_rts_flag
   logical( l_def ) :: lw_up_surf_flag
   logical( l_def ) :: sw_up_surf_flag
   logical( l_def ) :: lw_up_toa_flag
   logical( l_def ) :: sw_up_toa_flag
   logical( l_def ) :: sw_direct_toa_flag
+  logical( l_def ) :: photolysis_rates_rts_flag
 
   public :: initialise_diags_for_radiation
   public :: output_diags_for_radiation
@@ -74,6 +104,8 @@ contains
 subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
   lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
   sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+  sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+  lw_down_band_rts, lw_up_band_rts, &
   cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
   cloud_top_re_rts, cloud_top_weight_rts, &
   warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -87,8 +119,19 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
   sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
   sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
   lw_down_clear_rts, lw_up_clear_rts, &
+  sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+  lw_down_clear_band_rts, lw_up_clear_band_rts, &
   sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-  lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts )
+  lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+  sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+  lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+  sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+  lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+  sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+  sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+  sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+  sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+  photolysis_rates_rts )
 
   implicit none
 
@@ -99,6 +142,8 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
   type( field_type ), intent(inout) :: &
     lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
     sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    lw_down_band_rts, lw_up_band_rts, &
     cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
     cloud_top_re_rts, cloud_top_weight_rts, &
     warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -112,8 +157,19 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
     sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
     sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
     lw_down_clear_rts, lw_up_clear_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts, &
     sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+    photolysis_rates_rts
 
   ! Local working variables
   logical( l_def ) :: ignore
@@ -147,6 +203,7 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
                                   'radiation__liq_cloud_path_rts' )
   ice_cloud_path_rts_flag        = init_diag( ice_cloud_path_rts, &
                                   'radiation__ice_cloud_path_rts' )
+
   sw_down_clear_surf_rts_flag    = init_diag( sw_down_clear_surf_rts, &
                                   'radiation__sw_down_clear_surf_rts' )
   sw_up_clear_surf_rts_flag      = init_diag( sw_up_clear_surf_rts, &
@@ -159,6 +216,45 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
                                   'radiation__lw_up_clear_surf_rts' )
   lw_up_clear_toa_rts_flag       = init_diag( lw_up_clear_toa_rts, &
                                   'radiation__lw_up_clear_toa_rts' )
+
+  sw_down_clean_surf_rts_flag    = init_diag( sw_down_clean_surf_rts, &
+                                  'radiation__sw_down_clean_surf_rts' )
+  sw_up_clean_surf_rts_flag      = init_diag( sw_up_clean_surf_rts, &
+                                  'radiation__sw_up_clean_surf_rts' )
+  sw_up_clean_toa_rts_flag       = init_diag( sw_up_clean_toa_rts, &
+                                  'radiation__sw_up_clean_toa_rts' )
+  lw_down_clean_surf_rts_flag    = init_diag( lw_down_clean_surf_rts, &
+                                  'radiation__lw_down_clean_surf_rts' )
+  lw_up_clean_surf_rts_flag      = init_diag( lw_up_clean_surf_rts, &
+                                  'radiation__lw_up_clean_surf_rts' )
+  lw_up_clean_toa_rts_flag       = init_diag( lw_up_clean_toa_rts, &
+                                  'radiation__lw_up_clean_toa_rts' )
+
+  sw_down_clear_clean_surf_rts_flag  = init_diag( sw_down_clear_clean_surf_rts, &
+                                      'radiation__sw_down_clear_clean_surf_rts' )
+  sw_up_clear_clean_surf_rts_flag    = init_diag( sw_up_clear_clean_surf_rts, &
+                                      'radiation__sw_up_clear_clean_surf_rts' )
+  sw_up_clear_clean_toa_rts_flag     = init_diag( sw_up_clear_clean_toa_rts, &
+                                      'radiation__sw_up_clear_clean_toa_rts' )
+  lw_down_clear_clean_surf_rts_flag  = init_diag( lw_down_clear_clean_surf_rts, &
+                                      'radiation__lw_down_clear_clean_surf_rts' )
+  lw_up_clear_clean_surf_rts_flag    = init_diag( lw_up_clear_clean_surf_rts, &
+                                      'radiation__lw_up_clear_clean_surf_rts' )
+  lw_up_clear_clean_toa_rts_flag     = init_diag( lw_up_clear_clean_toa_rts, &
+                                      'radiation__lw_up_clear_clean_toa_rts' )
+
+  sw_down_uv_surf_rts_flag           = init_diag( sw_down_uv_surf_rts, &
+                                      'radiation__sw_down_uv_surf_rts' )
+  sw_direct_uv_surf_rts_flag         = init_diag( sw_direct_uv_surf_rts, &
+                                      'radiation__sw_direct_uv_surf_rts' )
+  sw_up_uv_surf_rts_flag             = init_diag( sw_up_uv_surf_rts, &
+                                      'radiation__sw_up_uv_surf_rts' )
+  sw_down_uv_clear_surf_rts_flag     = init_diag( sw_down_uv_clear_surf_rts, &
+                                      'radiation__sw_down_uv_clear_surf_rts' )
+  sw_direct_uv_clear_surf_rts_flag   = init_diag( sw_direct_uv_clear_surf_rts, &
+                                      'radiation__sw_direct_uv_clear_surf_rts' )
+  sw_up_uv_clear_surf_rts_flag       = init_diag( sw_up_uv_clear_surf_rts, &
+                                      'radiation__sw_up_uv_clear_surf_rts' )
 
   ! 3D fields in radiation layers (wtheta space)
   cloud_fraction_rts_flag            = init_diag( cloud_fraction_rts, &
@@ -220,6 +316,32 @@ subroutine initialise_diags_for_radiation( lw_down_surf, lw_heating_rate, &
   lw_up_clear_rts_flag     = init_diag( lw_up_clear_rts, &
                             'radiation__lw_up_clear_rts' )
 
+  ! 4D fields on radiation levels and bands (bflux space)
+  sw_direct_band_rts_flag       = init_diag( sw_direct_band_rts, &
+                                 'radiation__sw_direct_band_rts' )
+  sw_down_band_rts_flag         = init_diag( sw_down_band_rts, &
+                                 'radiation__sw_down_band_rts' )
+  sw_up_band_rts_flag           = init_diag( sw_up_band_rts, &
+                                 'radiation__sw_up_band_rts' )
+  lw_down_band_rts_flag         = init_diag( lw_down_band_rts, &
+                                 'radiation__lw_down_band_rts' )
+  lw_up_band_rts_flag           = init_diag( lw_up_band_rts, &
+                                 'radiation__lw_up_band_rts' )
+  sw_direct_clear_band_rts_flag = init_diag( sw_direct_clear_band_rts, &
+                                 'radiation__sw_direct_clear_band_rts' )
+  sw_down_clear_band_rts_flag   = init_diag( sw_down_clear_band_rts, &
+                                 'radiation__sw_down_clear_band_rts' )
+  sw_up_clear_band_rts_flag     = init_diag( sw_up_clear_band_rts, &
+                                 'radiation__sw_up_clear_band_rts' )
+  lw_down_clear_band_rts_flag   = init_diag( lw_down_clear_band_rts, &
+                                 'radiation__lw_down_clear_band_rts' )
+  lw_up_clear_band_rts_flag     = init_diag( lw_up_clear_band_rts, &
+                                 'radiation__lw_up_clear_band_rts' )
+
+  ! 4D fields in radiation layers and photolysis pathways (ph space)
+  photolysis_rates_rts_flag     = init_diag( photolysis_rates_rts, &
+                                 'radiation__photolysis_rates_rts' )
+
   ! Initialise fields for diagnostic dependencies
   if ( cloud_top_re_rts_flag .and. .not. cloud_top_weight_rts_flag ) &
     ignore = init_diag( cloud_top_weight_rts, &
@@ -262,10 +384,12 @@ subroutine output_diags_for_radiation( dtheta_rad, &
   radiative_cloud_fraction, liquid_fraction, frozen_fraction, &
   mcl, mci, n_ice, cloud_drop_no_conc, &
   radiative_conv_fraction, conv_liquid_fraction, conv_frozen_fraction, &
-  conv_liquid_mmr, conv_frozen_mmr, sigma_mc, &
+  conv_liquid_mmr, conv_frozen_mmr, sigma_mc, rand_seed, &
   layer_heat_capacity, sulphuric, &
   lw_up_surf, sw_up_surf, lw_up_toa, sw_up_toa, sw_direct_toa, &
   sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
+  sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+  lw_down_band_rts, lw_up_band_rts, &
   cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
   cloud_top_re_rts, cloud_top_weight_rts, &
   warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
@@ -279,8 +403,19 @@ subroutine output_diags_for_radiation( dtheta_rad, &
   sw_aer_optical_depth_rts, lw_aer_optical_depth_rts, &
   sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
   lw_down_clear_rts, lw_up_clear_rts, &
+  sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+  lw_down_clear_band_rts, lw_up_clear_band_rts, &
   sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-  lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts )
+  lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+  sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+  lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+  sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+  lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+  sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+  sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+  sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+  sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+  photolysis_rates_rts )
 
   implicit none
 
@@ -309,6 +444,7 @@ subroutine output_diags_for_radiation( dtheta_rad, &
     radiative_conv_fraction, conv_liquid_fraction, conv_frozen_fraction, &
     conv_liquid_mmr, conv_frozen_mmr, sigma_mc, &
     layer_heat_capacity, sulphuric
+  type( integer_field_type ), intent(in) :: rand_seed
 
   ! Diagnostic fields that are always required by the kernels
   type( field_type ), intent(in) :: &
@@ -330,15 +466,28 @@ subroutine output_diags_for_radiation( dtheta_rad, &
     sw_direct_rts, sw_down_rts, sw_up_rts, lw_down_rts, lw_up_rts, &
     sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
     lw_down_clear_rts, lw_up_clear_rts, &
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    lw_down_band_rts, lw_up_band_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts, &
     sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
-    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, lw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+    photolysis_rates_rts
 
   ! Diagnostics locally computed here from other fields
   type( field_type ) :: &
     sw_temperature_incr, lw_temperature_incr, &
     sw_net_surf, lw_net_surf, sw_net_surf_rts, lw_net_surf_rts, &
     sw_diffuse_surf, sw_diffuse_surf_rts, sw_direct_orog_incr_rts, &
-    lw_net_skyview_incr
+    lw_net_skyview_incr, rand_seed_real
 
   ! Locally computed diagnostics
   logical( l_def ) :: lw_net_surf_flag
@@ -383,20 +532,20 @@ subroutine output_diags_for_radiation( dtheta_rad, &
 
   call sw_up_tile%write_field('radiation__sw_up_tile')
 
-  if (diagnostic_to_be_sampled('radiation__aer_mix_ratio')) &
-       call aer_mix_ratio%write_field('radiation__aer_mix_ratio')
-  if (diagnostic_to_be_sampled('radiation__aer_sw_abs')) &
-       call aer_sw_absorption%write_field('radiation__aer_sw_abs')
-  if (diagnostic_to_be_sampled('radiation__aer_sw_sca')) &
-       call aer_sw_scattering%write_field('radiation__aer_sw_sca')
-  if (diagnostic_to_be_sampled('radiation__aer_sw_asy')) &
-       call aer_sw_asymmetry%write_field('radiation__aer_sw_asy')
-  if (diagnostic_to_be_sampled('radiation__aer_lw_abs')) &
-       call aer_lw_absorption%write_field('radiation__aer_lw_abs')
-  if (diagnostic_to_be_sampled('radiation__aer_lw_sca')) &
-       call aer_lw_scattering%write_field('radiation__aer_lw_sca')
-  if (diagnostic_to_be_sampled('radiation__aer_lw_asy')) &
-       call aer_lw_asymmetry%write_field('radiation__aer_lw_asy')
+  if (diagnostic_to_be_sampled('radiation__aer_mix_ratio_radinput')) &
+       call aer_mix_ratio%write_field('radiation__aer_mix_ratio_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_sw_abs_radinput')) &
+       call aer_sw_absorption%write_field('radiation__aer_sw_abs_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_sw_sca_radinput')) &
+       call aer_sw_scattering%write_field('radiation__aer_sw_sca_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_sw_asy_radinput')) &
+       call aer_sw_asymmetry%write_field('radiation__aer_sw_asy_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_lw_abs_radinput')) &
+       call aer_lw_absorption%write_field('radiation__aer_lw_abs_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_lw_sca_radinput')) &
+       call aer_lw_scattering%write_field('radiation__aer_lw_sca_radinput')
+  if (diagnostic_to_be_sampled('radiation__aer_lw_asy_radinput')) &
+       call aer_lw_asymmetry%write_field('radiation__aer_lw_asy_radinput')
 
   call pressure_in_wth%write_field('radiation__pressure_in_layers_radinput')
   call temperature_in_wth%write_field('radiation__temperature_in_layers_radinput')
@@ -449,6 +598,10 @@ subroutine output_diags_for_radiation( dtheta_rad, &
   if ( init_diag(sw_net_surf, 'radiation__sw_net_surf') ) then
     call invoke( X_minus_Y(sw_net_surf, sw_down_surf, sw_up_surf) )
     call sw_net_surf%write_field()
+  end if
+  if ( init_diag(rand_seed_real, 'radiation__rand_seed_real_radinput') ) then
+    call invoke( int_to_real_X(rand_seed_real, rand_seed) )
+    call rand_seed_real%write_field()
   end if
 
   ! lw_net_skyview_incr requires lw_net_surf
@@ -537,12 +690,47 @@ subroutine output_diags_for_radiation( dtheta_rad, &
   if ( lw_down_clear_rts_flag ) call lw_down_clear_rts%write_field()
   if ( lw_up_clear_rts_flag ) call lw_up_clear_rts%write_field()
 
+  if ( sw_direct_band_rts_flag ) call sw_direct_band_rts%write_field()
+  if ( sw_down_band_rts_flag ) call sw_down_band_rts%write_field()
+  if ( sw_up_band_rts_flag ) call sw_up_band_rts%write_field()
+  if ( lw_down_band_rts_flag ) call lw_down_band_rts%write_field()
+  if ( lw_up_band_rts_flag ) call lw_up_band_rts%write_field()
+
+  if ( sw_direct_clear_band_rts_flag ) call sw_direct_clear_band_rts%write_field()
+  if ( sw_down_clear_band_rts_flag ) call sw_down_clear_band_rts%write_field()
+  if ( sw_up_clear_band_rts_flag ) call sw_up_clear_band_rts%write_field()
+  if ( lw_down_clear_band_rts_flag ) call lw_down_clear_band_rts%write_field()
+  if ( lw_up_clear_band_rts_flag ) call lw_up_clear_band_rts%write_field()
+
   if ( sw_down_clear_surf_rts_flag ) call sw_down_clear_surf_rts%write_field()
   if ( sw_up_clear_surf_rts_flag ) call sw_up_clear_surf_rts%write_field()
   if ( sw_up_clear_toa_rts_flag ) call sw_up_clear_toa_rts%write_field()
   if ( lw_down_clear_surf_rts_flag ) call lw_down_clear_surf_rts%write_field()
   if ( lw_up_clear_surf_rts_flag ) call lw_up_clear_surf_rts%write_field()
   if ( lw_up_clear_toa_rts_flag ) call lw_up_clear_toa_rts%write_field()
+
+  if ( sw_down_clean_surf_rts_flag ) call sw_down_clean_surf_rts%write_field()
+  if ( sw_up_clean_surf_rts_flag ) call sw_up_clean_surf_rts%write_field()
+  if ( sw_up_clean_toa_rts_flag ) call sw_up_clean_toa_rts%write_field()
+  if ( lw_down_clean_surf_rts_flag ) call lw_down_clean_surf_rts%write_field()
+  if ( lw_up_clean_surf_rts_flag ) call lw_up_clean_surf_rts%write_field()
+  if ( lw_up_clean_toa_rts_flag ) call lw_up_clean_toa_rts%write_field()
+
+  if ( sw_down_clear_clean_surf_rts_flag ) call sw_down_clear_clean_surf_rts%write_field()
+  if ( sw_up_clear_clean_surf_rts_flag ) call sw_up_clear_clean_surf_rts%write_field()
+  if ( sw_up_clear_clean_toa_rts_flag ) call sw_up_clear_clean_toa_rts%write_field()
+  if ( lw_down_clear_clean_surf_rts_flag ) call lw_down_clear_clean_surf_rts%write_field()
+  if ( lw_up_clear_clean_surf_rts_flag ) call lw_up_clear_clean_surf_rts%write_field()
+  if ( lw_up_clear_clean_toa_rts_flag ) call lw_up_clear_clean_toa_rts%write_field()
+
+  if ( sw_down_uv_surf_rts_flag ) call sw_down_uv_surf_rts%write_field()
+  if ( sw_direct_uv_surf_rts_flag ) call sw_direct_uv_surf_rts%write_field()
+  if ( sw_up_uv_surf_rts_flag ) call sw_up_uv_surf_rts%write_field()
+  if ( sw_down_uv_clear_surf_rts_flag ) call sw_down_uv_clear_surf_rts%write_field()
+  if ( sw_direct_uv_clear_surf_rts_flag ) call sw_direct_uv_clear_surf_rts%write_field()
+  if ( sw_up_uv_clear_surf_rts_flag ) call sw_up_uv_clear_surf_rts%write_field()
+
+  if ( photolysis_rates_rts_flag ) call photolysis_rates_rts%write_field()
 
   if ( subroutine_timers ) call timer("radiation_diags")
 

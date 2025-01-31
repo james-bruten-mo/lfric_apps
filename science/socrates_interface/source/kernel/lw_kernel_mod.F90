@@ -17,7 +17,8 @@ use argument_mod,      only : arg_type, &
                               ANY_DISCONTINUOUS_SPACE_3, &
                               ANY_DISCONTINUOUS_SPACE_4, &
                               ANY_DISCONTINUOUS_SPACE_5, &
-                              ANY_DISCONTINUOUS_SPACE_6
+                              ANY_DISCONTINUOUS_SPACE_6, &
+                              ANY_DISCONTINUOUS_SPACE_7
 use fs_continuity_mod, only : Wtheta
 use constants_mod,     only : r_def, i_def
 use kernel_mod,        only : kernel_type
@@ -33,7 +34,7 @@ private
 ! Contains the metadata needed by the PSy layer.
 type, public, extends(kernel_type) :: lw_kernel_type
   private
-  type(arg_type) :: meta_args(70) = (/ &
+  type(arg_type) :: meta_args(80) = (/ &
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, Wtheta),                    & ! lw_heating_rate_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1), & ! lw_down_surf_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_surf_rts
@@ -102,9 +103,19 @@ type, public, extends(kernel_type) :: lw_kernel_type
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! lw_up_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! lw_down_clear_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! lw_up_clear_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! lw_down_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! lw_up_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! lw_down_clear_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! lw_up_clear_band_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_down_clear_surf_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_clear_surf_rts
-    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1)  & ! lw_up_clear_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_clear_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_down_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_clean_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_down_clear_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! lw_up_clear_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1)  & ! lw_up_clear_clean_toa_rts
     /)
   integer :: operates_on = DOMAIN
 contains
@@ -187,9 +198,19 @@ contains
 !> @param[in,out] lw_up_rts                Diagnostic: LW upwards flux on radiation levels
 !> @param[in,out] lw_down_clear_rts        Diagnostic: Clear-sky LW downwards flux on radiation levels
 !> @param[in,out] lw_up_clear_rts          Diagnostic: Clear-sky LW upwards flux on radiation levels
+!> @param[in,out] lw_down_band_rts         Diagnostic: LW downwards flux on radiation levels and bands
+!> @param[in,out] lw_up_band_rts           Diagnostic: LW upwards flux on radiation levels and bands
+!> @param[in,out] lw_down_clear_band_rts   Diagnostic: Clear-sky LW down flux on radiation levels and bands
+!> @param[in,out] lw_up_clear_band_rts     Diagnostic: Clear-sky LW up flux on radiation levels and bands
 !> @param[in,out] lw_down_clear_surf_rts   Diagnostic: Clear-sky LW downwards surface flux
 !> @param[in,out] lw_up_clear_surf_rts     Diagnostic: Clear-sky LW upwards surface flux
 !> @param[in,out] lw_up_clear_toa_rts      Diagnostic: Clear-sky LW upwards top-of-atmosphere flux
+!> @param[in,out] lw_down_clean_surf_rts   Diagnostic: Clean-air LW downwards surface flux
+!> @param[in,out] lw_up_clean_surf_rts     Diagnostic: Clean-air LW upwards surface flux
+!> @param[in,out] lw_up_clean_toa_rts      Diagnostic: Clean-air LW upwards top-of-atmosphere flux
+!> @param[in,out] lw_down_clear_clean_surf_rts   Diag: Clear-clean LW downwards surface flux
+!> @param[in,out] lw_up_clear_clean_surf_rts     Diag: Clear-clean LW upwards surface flux
+!> @param[in,out] lw_up_clear_clean_toa_rts      Diag: Clear-clean LW upwards top-of-atmosphere flux
 !> @param[in]     ndf_wth                  No. DOFs per cell for wth space
 !> @param[in]     undf_wth                 No. unique of DOFs for wth space
 !> @param[in]     map_wth                  Dofmap for wth space column base cell
@@ -211,41 +232,50 @@ contains
 !> @param[in]     ndf_rmode                No. of DOFs per cell for rmode space
 !> @param[in]     undf_rmode               No. unique of DOFs for rmode space
 !> @param[in]     map_rmode                Dofmap for rmode space column base cell
-subroutine lw_code(nlayers, n_profile,                                         &
-                   lw_heating_rate_rts, lw_down_surf_rts, lw_up_surf_rts,      &
-                   lw_up_toa_rts, lw_up_tile_rts,                              &
-                   rho_in_wth, pressure_in_wth, temperature_in_wth,            &
-                   t_layer_boundaries, d_mass, layer_heat_capacity,            &
-                   h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn,  &
-                   mcl, mci, n_ice,                                            &
-                   conv_liquid_mmr, conv_frozen_mmr,                           &
-                   radiative_cloud_fraction, radiative_conv_fraction,          &
-                   liquid_fraction, frozen_fraction,                           &
-                   conv_liquid_fraction, conv_frozen_fraction,                 &
-                   sigma_mc, cloud_drop_no_conc,                               &
-                   rand_seed, n_cloud_layer,                                   &
-                   tile_fraction, tile_temperature, tile_lw_albedo,            &
-                   sulphuric, aer_mix_ratio,                                   &
-                   aer_lw_absorption, aer_lw_scattering, aer_lw_asymmetry,     &
-                   cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts,  &
-                   liq_cloud_frac_rts, liq_conv_frac_rts,                      &
-                   ice_cloud_frac_rts, ice_conv_frac_rts,                      &
-                   liq_cloud_mmr_rts, liq_conv_mmr_rts,                        &
-                   ice_cloud_mmr_rts, ice_conv_mmr_rts,                        &
-                   liq_cloud_path_rts, ice_cloud_path_rts,                     &
-                   cloud_absorptivity_rts, cloud_weight_absorptivity_rts,      &
-                   lw_aer_optical_depth_rts,                                   &
-                   lw_down_rts, lw_up_rts,                                     &
-                   lw_down_clear_rts, lw_up_clear_rts,                         &
-                   lw_down_clear_surf_rts, lw_up_clear_surf_rts,               &
-                   lw_up_clear_toa_rts,                                        &
-                   ndf_wth, undf_wth, map_wth,                                 &
-                   ndf_2d, undf_2d, map_2d,                                    &
-                   ndf_tile, undf_tile, map_tile,                              &
-                   ndf_flux, undf_flux, map_flux,                              &
-                   ndf_rtile, undf_rtile, map_rtile,                           &
-                   ndf_mode, undf_mode, map_mode,                              &
-                   ndf_rmode, undf_rmode, map_rmode)
+!> @param[in]     ndf_bflux                No. of DOFs per cell for bflux space
+!> @param[in]     undf_bflux               No. unique of DOFs for bflux space
+!> @param[in]     map_bflux                Dofmap for bflux space column base cell
+subroutine lw_code(nlayers, n_profile, &
+    lw_heating_rate_rts, lw_down_surf_rts, lw_up_surf_rts, &
+    lw_up_toa_rts, lw_up_tile_rts, &
+    rho_in_wth, pressure_in_wth, temperature_in_wth, &
+    t_layer_boundaries, d_mass, layer_heat_capacity, &
+    h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn, &
+    mcl, mci, n_ice, &
+    conv_liquid_mmr, conv_frozen_mmr, &
+    radiative_cloud_fraction, radiative_conv_fraction, &
+    liquid_fraction, frozen_fraction, &
+    conv_liquid_fraction, conv_frozen_fraction, &
+    sigma_mc, cloud_drop_no_conc, &
+    rand_seed, n_cloud_layer, &
+    tile_fraction, tile_temperature, tile_lw_albedo, &
+    sulphuric, aer_mix_ratio, &
+    aer_lw_absorption, aer_lw_scattering, aer_lw_asymmetry, &
+    ! Conditional diagnostics
+    cloud_cover_rts, cloud_fraction_rts, cloud_droplet_re_rts, &
+    liq_cloud_frac_rts, liq_conv_frac_rts, &
+    ice_cloud_frac_rts, ice_conv_frac_rts, &
+    liq_cloud_mmr_rts, liq_conv_mmr_rts, &
+    ice_cloud_mmr_rts, ice_conv_mmr_rts, &
+    liq_cloud_path_rts, ice_cloud_path_rts, &
+    cloud_absorptivity_rts, cloud_weight_absorptivity_rts, &
+    lw_aer_optical_depth_rts, &
+    lw_down_rts, lw_up_rts, &
+    lw_down_clear_rts, lw_up_clear_rts, &
+    lw_down_band_rts, lw_up_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts, &
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    lw_up_clear_clean_toa_rts, &
+    ndf_wth, undf_wth, map_wth, &
+    ndf_2d, undf_2d, map_2d, &
+    ndf_tile, undf_tile, map_tile, &
+    ndf_flux, undf_flux, map_flux, &
+    ndf_rtile, undf_rtile, map_rtile, &
+    ndf_mode, undf_mode, map_mode, &
+    ndf_rmode, undf_rmode, map_rmode, &
+    ndf_bflux, undf_bflux, map_bflux)
 
   use radiation_config_mod, only: &
     i_cloud_ice_type_lw, i_cloud_liq_type_lw, &
@@ -255,7 +285,7 @@ subroutine lw_code(nlayers, n_profile,                                         &
                                 sulphuric_strat_climatology, &
                                 easyaerosol_lw
   use jules_control_init_mod, only: n_surf_tile
-  use socrates_init_mod, only: n_lw_band, &
+  use socrates_init_mod, only: n_lw_band, lw_11um, &
     i_scatter_method_lw, &
     i_cloud_representation, i_overlap, i_inhom, i_cloud_entrapment, &
     i_drop_re
@@ -293,6 +323,7 @@ subroutine lw_code(nlayers, n_profile,                                         &
   integer(i_def), intent(in) :: ndf_rtile, undf_rtile
   integer(i_def), intent(in) :: ndf_mode, undf_mode
   integer(i_def), intent(in) :: ndf_rmode, undf_rmode
+  integer(i_def), intent(in) :: ndf_bflux, undf_bflux
 
   integer(i_def), dimension(ndf_wth, n_profile),   intent(in) :: map_wth
   integer(i_def), dimension(ndf_2d, n_profile),    intent(in) :: map_2d
@@ -301,6 +332,7 @@ subroutine lw_code(nlayers, n_profile,                                         &
   integer(i_def), dimension(ndf_rtile, n_profile), intent(in) :: map_rtile
   integer(i_def), dimension(ndf_mode, n_profile),  intent(in) :: map_mode
   integer(i_def), dimension(ndf_rmode, n_profile), intent(in) :: map_rmode
+  integer(i_def), dimension(ndf_bflux, n_profile), intent(in) :: map_bflux
 
   real(r_def), dimension(undf_2d),   intent(inout), target :: &
     lw_down_surf_rts, lw_up_surf_rts, lw_up_toa_rts
@@ -334,7 +366,10 @@ subroutine lw_code(nlayers, n_profile,                                         &
   real(r_def), pointer, dimension(:), intent(inout) :: & ! 2d
     cloud_cover_rts, &
     liq_cloud_path_rts, ice_cloud_path_rts, &
-    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts
+    lw_down_clear_surf_rts, lw_up_clear_surf_rts, lw_up_clear_toa_rts, &
+    lw_down_clean_surf_rts, lw_up_clean_surf_rts, lw_up_clean_toa_rts, &
+    lw_down_clear_clean_surf_rts, lw_up_clear_clean_surf_rts, &
+    lw_up_clear_clean_toa_rts
   real(r_def), pointer, dimension(:), intent(inout) :: & ! wth
     cloud_fraction_rts, cloud_droplet_re_rts, &
     liq_cloud_frac_rts, liq_conv_frac_rts, &
@@ -346,6 +381,9 @@ subroutine lw_code(nlayers, n_profile,                                         &
   real(r_def), pointer, dimension(:), intent(inout) :: & ! flux
     lw_down_rts, lw_up_rts, &
     lw_down_clear_rts, lw_up_clear_rts
+  real(r_def), pointer, dimension(:), intent(inout) :: & ! bflux
+    lw_down_band_rts, lw_up_band_rts, &
+    lw_down_clear_band_rts, lw_up_clear_band_rts
 
   ! Local variables for the kernel
   integer(i_def) :: n_profile_list
@@ -354,7 +392,8 @@ subroutine lw_code(nlayers, n_profile,                                         &
   integer(i_def) :: wth_0, wth_1, wth_last
   integer(i_def) :: tile_1, tile_last, rtile_1, rtile_last
   integer(i_def) :: mode_1, mode_last, rmode_1, rmode_last
-  integer(i_def) :: flux_0, flux_last, twod_1, twod_last
+  integer(i_def) :: flux_0, flux_last, bflux_0, bflux_last
+  integer(i_def) :: twod_1, twod_last
   type(StrDiag)  :: lw_diag
   logical        :: l_aerosol_mode
 
@@ -372,6 +411,8 @@ subroutine lw_code(nlayers, n_profile,                                         &
   rmode_last = map_rmode(1,1)+n_profile*(nlayers+1)*lw_band_mode-1
   flux_0 = map_flux(1,1)
   flux_last = map_flux(1,1)+n_profile*(nlayers+1)-1
+  bflux_0 = map_bflux(1,1)
+  bflux_last = map_bflux(1,1)+n_profile*n_lw_band*(nlayers+1)-1
   twod_1 = map_2d(1,1)
   twod_last = map_2d(1,1)+n_profile-1
 
@@ -398,6 +439,20 @@ subroutine lw_code(nlayers, n_profile,                                         &
   if (.not. associated(lw_up_clear_rts, empty_real_data)) &
     lw_diag%flux_up_clear(0:nlayers, 1:n_profile) &
                     => lw_up_clear_rts(flux_0:flux_last)
+
+  if (.not. associated(lw_down_band_rts, empty_real_data)) &
+    lw_diag%flux_down_band(0:nlayers, 1:n_lw_band, 1:n_profile) &
+                    => lw_down_band_rts(bflux_0:bflux_last)
+  if (.not. associated(lw_up_band_rts, empty_real_data)) &
+    lw_diag%flux_up_band(0:nlayers, 1:n_lw_band, 1:n_profile) &
+                    => lw_up_band_rts(bflux_0:bflux_last)
+  if (.not. associated(lw_down_clear_band_rts, empty_real_data)) &
+    lw_diag%flux_down_clear_band(0:nlayers, 1:n_lw_band, 1:n_profile) &
+                    => lw_down_clear_band_rts(bflux_0:bflux_last)
+  if (.not. associated(lw_up_clear_band_rts, empty_real_data)) &
+    lw_diag%flux_up_clear_band(0:nlayers, 1:n_lw_band, 1:n_profile) &
+                    => lw_up_clear_band_rts(bflux_0:bflux_last)
+
   if (.not. associated(lw_down_clear_surf_rts, empty_real_data)) &
     lw_diag%flux_down_clear_surf(1:n_profile) &
                     => lw_down_clear_surf_rts(twod_1:twod_last)
@@ -407,6 +462,27 @@ subroutine lw_code(nlayers, n_profile,                                         &
   if (.not. associated(lw_up_clear_toa_rts, empty_real_data)) &
     lw_diag%flux_up_clear_toa(1:n_profile) &
                     => lw_up_clear_toa_rts(twod_1:twod_last)
+
+  if (.not. associated(lw_down_clean_surf_rts, empty_real_data)) &
+    lw_diag%flux_down_clean_surf(1:n_profile) &
+                    => lw_down_clean_surf_rts(twod_1:twod_last)
+  if (.not. associated(lw_up_clean_surf_rts, empty_real_data)) &
+    lw_diag%flux_up_clean_surf(1:n_profile) &
+                    => lw_up_clean_surf_rts(twod_1:twod_last)
+  if (.not. associated(lw_up_clean_toa_rts, empty_real_data)) &
+    lw_diag%flux_up_clean_toa(1:n_profile) &
+                    => lw_up_clean_toa_rts(twod_1:twod_last)
+
+  if (.not. associated(lw_down_clear_clean_surf_rts, empty_real_data)) &
+    lw_diag%flux_down_clear_clean_surf(1:n_profile) &
+                    => lw_down_clear_clean_surf_rts(twod_1:twod_last)
+  if (.not. associated(lw_up_clear_clean_surf_rts, empty_real_data)) &
+    lw_diag%flux_up_clear_clean_surf(1:n_profile) &
+                    => lw_up_clear_clean_surf_rts(twod_1:twod_last)
+  if (.not. associated(lw_up_clear_clean_toa_rts, empty_real_data)) &
+    lw_diag%flux_up_clear_clean_toa(1:n_profile) &
+                    => lw_up_clear_clean_toa_rts(twod_1:twod_last)
+
   if (.not. associated(cloud_cover_rts, empty_real_data)) &
     lw_diag%total_cloud_cover(1:n_profile) &
                     => cloud_cover_rts(twod_1:twod_last)
@@ -453,10 +529,9 @@ subroutine lw_code(nlayers, n_profile,                                         &
     lw_diag%cloud_weight_absorptivity(0:nlayers, 1:n_profile) &
                     => cloud_weight_absorptivity_rts(wth_0:wth_last)
 
-  ! Aerosol optical depth for LW band 5 is output (8.3-12.5 micron). Once the
-  ! diagnostic infrastructure is in place the band(s) may be user defined.
+  ! Aerosol optical depth for LW band at 11 micron
   if (.not. associated(lw_aer_optical_depth_rts, empty_real_data)) &
-    lw_diag%aerosol_optical_depth(0:nlayers, 5:5, 1:n_profile) &
+    lw_diag%aerosol_optical_depth(0:nlayers, lw_11um:lw_11um, 1:n_profile) &
                     => lw_aer_optical_depth_rts(wth_0:wth_last)
 
   ! If radaer or easyaerosol are running, socrates includes aerosol modes

@@ -17,7 +17,9 @@ use argument_mod,      only : arg_type, &
                               ANY_DISCONTINUOUS_SPACE_3, &
                               ANY_DISCONTINUOUS_SPACE_4, &
                               ANY_DISCONTINUOUS_SPACE_5, &
-                              ANY_DISCONTINUOUS_SPACE_6
+                              ANY_DISCONTINUOUS_SPACE_6, &
+                              ANY_DISCONTINUOUS_SPACE_7, &
+                              ANY_DISCONTINUOUS_SPACE_8
 use fs_continuity_mod, only : Wtheta
 use constants_mod,     only : r_def, i_def
 use kernel_mod,        only : kernel_type
@@ -33,7 +35,7 @@ private
 ! Contains the metadata needed by the PSy layer.
 type, public, extends(kernel_type) :: sw_kernel_type
   private
-  type(arg_type) :: meta_args(71) = (/ &
+  type(arg_type) :: meta_args(90) = (/ &
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, Wtheta),                    & ! sw_heating_rate_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_surf_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1), & ! sw_direct_surf_rts
@@ -103,9 +105,28 @@ type, public, extends(kernel_type) :: sw_kernel_type
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! sw_direct_clear_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! sw_down_clear_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_6), & ! sw_up_clear_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_direct_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_down_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_up_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_direct_clear_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_down_clear_band_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_7), & ! sw_up_clear_band_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_clear_surf_rts
     arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clear_surf_rts
-    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1)  & ! sw_up_clear_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clear_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clean_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_clear_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clear_clean_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_clear_clean_toa_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_uv_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_down_uv_clear_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_direct_uv_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_direct_uv_clear_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_uv_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_1), & ! sw_up_uv_clear_surf_rts
+    arg_type(GH_FIELD,  GH_REAL,    GH_WRITE,     ANY_DISCONTINUOUS_SPACE_8)  & ! photolysis_rates_rts
     /)
   integer :: operates_on = DOMAIN
 contains
@@ -189,9 +210,28 @@ contains
 !> @param[in,out] sw_direct_clear_rts       Diagnostic: Clear-sky SW direct flux on radiation levels
 !> @param[in,out] sw_down_clear_rts         Diagnostic: Clear-sky SW downwards flux on radiation levels
 !> @param[in,out] sw_up_clear_rts           Diagnostic: Clear-sky SW upwards flux on radiation levels
+!> @param[in,out] sw_direct_band_rts        Diagnostic: SW direct flux on radiation levels and bands
+!> @param[in,out] sw_down_band_rts          Diagnostic: SW downwards flux on radiation levels and bands
+!> @param[in,out] sw_up_band_rts            Diagnostic: SW upwards flux on radiation levels and bands
+!> @param[in,out] sw_direct_clear_band_rts  Diagnostic: Clear-sky SW direct flux on radiation levels and bands
+!> @param[in,out] sw_down_clear_band_rts    Diagnostic: Clear-sky SW down flux on radiation levels and bands
+!> @param[in,out] sw_up_clear_band_rts      Diagnostic: Clear-sky SW up flux on radiation levels and bands
 !> @param[in,out] sw_down_clear_surf_rts    Diagnostic: Clear-sky SW downwards surface flux
 !> @param[in,out] sw_up_clear_surf_rts      Diagnostic: Clear-sky SW upwards surface flux
 !> @param[in,out] sw_up_clear_toa_rts       Diagnostic: Clear-sky SW upwards top-of-atmosphere flux
+!> @param[in,out] sw_down_clean_surf_rts    Diagnostic: Clean-air SW downwards surface flux
+!> @param[in,out] sw_up_clean_surf_rts      Diagnostic: Clean-air SW upwards surface flux
+!> @param[in,out] sw_up_clean_toa_rts       Diagnostic: Clean-air SW upwards top-of-atmosphere flux
+!> @param[in,out] sw_down_clear_clean_surf_rts    Diag: Clear-clean SW downwards surface flux
+!> @param[in,out] sw_up_clear_clean_surf_rts      Diag: Clear-clean SW upwards surface flux
+!> @param[in,out] sw_up_clear_clean_toa_rts       Diag: Clear-clean SW upwards top-of-atmosphere flux
+!> @param[in,out] sw_down_uv_surf_rts       Diagnostic: UV downwards surface flux
+!> @param[in,out] sw_down_uv_clear_surf_rts Diagnostic: Clear-sky UV downwards surface flux
+!> @param[in,out] sw_direct_uv_surf_rts     Diagnostic: UV direct surface flux
+!> @param[in,out] sw_direct_uv_clear_surf_rts     Diag: Clear-sky UV direct surface flux
+!> @param[in,out] sw_up_uv_surf_rts         Diagnostic: UV upwards surface flux
+!> @param[in,out] sw_up_uv_clear_surf_rts   Diagnostic: Clear-sky UV upwards surface flux
+!> @param[in,out] photolysis_rates_rts      Diagnostic: Photolysis rates
 !> @param[in]     ndf_wth                   No. DOFs per cell for wth space
 !> @param[in]     undf_wth                  No. unique of DOFs for wth space
 !> @param[in]     map_wth                   Dofmap for wth space column base cell
@@ -213,42 +253,59 @@ contains
 !> @param[in]     ndf_flux                  No. of DOFs per cell for flux space
 !> @param[in]     undf_flux                 No. unique of DOFs for flux space
 !> @param[in]     map_flux                  Dofmap for flux space column base cell
-subroutine sw_code(nlayers, n_profile,                                         &
-                   sw_heating_rate_rts, sw_down_surf_rts, sw_direct_surf_rts,  &
-                   sw_down_blue_surf_rts, sw_direct_blue_surf_rts,             &
-                   sw_up_surf_rts, sw_up_toa_rts, sw_direct_toa_rts,           &
-                   sw_up_tile_rts, sw_up_blue_tile_rts,                        &
-                   rho_in_wth, pressure_in_wth, temperature_in_wth,            &
-                   d_mass, layer_heat_capacity,                                &
-                   cos_zenith_angle_rts, lit_fraction_rts,                     &
-                   stellar_irradiance_rts, orographic_correction_rts,          &
-                   h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn,  &
-                   mcl, mci, n_ice,                                            &
-                   conv_liquid_mmr, conv_frozen_mmr,                           &
-                   radiative_cloud_fraction, radiative_conv_fraction,          &
-                   liquid_fraction, frozen_fraction,                           &
-                   conv_liquid_fraction, conv_frozen_fraction,                 &
-                   sigma_mc, cloud_drop_no_conc,                               &
-                   rand_seed, n_cloud_layer,                                   &
-                   tile_fraction,                                              &
-                   tile_sw_direct_albedo, tile_sw_diffuse_albedo,              &
-                   sulphuric, aer_mix_ratio,                                   &
-                   aer_sw_absorption, aer_sw_scattering, aer_sw_asymmetry,     &
-                   cloud_top_re_rts, cloud_top_weight_rts,                     &
-                   warm_cloud_top_re_rts, warm_cloud_top_weight_rts,           &
-                   cloud_extinction_rts, cloud_weight_extinction_rts,          &
-                   sw_aer_optical_depth_rts,                                   &
-                   sw_direct_rts, sw_down_rts, sw_up_rts,                      &
-                   sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts,    &
-                   sw_down_clear_surf_rts, sw_up_clear_surf_rts,               &
-                   sw_up_clear_toa_rts,                                        &
-                   ndf_wth, undf_wth, map_wth,                                 &
-                   ndf_2d, undf_2d, map_2d,                                    &
-                   ndf_tile, undf_tile, map_tile,                              &
-                   ndf_rtile, undf_rtile, map_rtile,                           &
-                   ndf_mode, undf_mode, map_mode,                              &
-                   ndf_rmode, undf_rmode, map_rmode,                           &
-                   ndf_flux, undf_flux, map_flux)
+!> @param[in]     ndf_bflux                 No. of DOFs per cell for bflux space
+!> @param[in]     undf_bflux                No. unique of DOFs for bflux space
+!> @param[in]     map_bflux                 Dofmap for bflux space column base cell
+!> @param[in]     ndf_ph                    No. of DOFs per cell for ph space
+!> @param[in]     undf_ph                   No. unique of DOFs for ph space
+!> @param[in]     map_ph                    Dofmap for ph space column base cell
+subroutine sw_code(nlayers, n_profile, &
+    sw_heating_rate_rts, sw_down_surf_rts, sw_direct_surf_rts, &
+    sw_down_blue_surf_rts, sw_direct_blue_surf_rts, &
+    sw_up_surf_rts, sw_up_toa_rts, sw_direct_toa_rts, &
+    sw_up_tile_rts, sw_up_blue_tile_rts, &
+    rho_in_wth, pressure_in_wth, temperature_in_wth, &
+    d_mass, layer_heat_capacity, &
+    cos_zenith_angle_rts, lit_fraction_rts, &
+    stellar_irradiance_rts, orographic_correction_rts, &
+    h2o, co2, o3, n2o, co, ch4, o2, so2, nh3, n2, h2, he, hcn, &
+    mcl, mci, n_ice, &
+    conv_liquid_mmr, conv_frozen_mmr, &
+    radiative_cloud_fraction, radiative_conv_fraction, &
+    liquid_fraction, frozen_fraction, &
+    conv_liquid_fraction, conv_frozen_fraction, &
+    sigma_mc, cloud_drop_no_conc, &
+    rand_seed, n_cloud_layer, &
+    tile_fraction, &
+    tile_sw_direct_albedo, tile_sw_diffuse_albedo, &
+    sulphuric, aer_mix_ratio, &
+    aer_sw_absorption, aer_sw_scattering, aer_sw_asymmetry, &
+    ! Conditional diagnostics
+    cloud_top_re_rts, cloud_top_weight_rts, &
+    warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
+    cloud_extinction_rts, cloud_weight_extinction_rts, &
+    sw_aer_optical_depth_rts, &
+    sw_direct_rts, sw_down_rts, sw_up_rts, &
+    sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts, &
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts, &
+    sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts, &
+    photolysis_rates_rts, &
+    ndf_wth, undf_wth, map_wth, &
+    ndf_2d, undf_2d, map_2d, &
+    ndf_tile, undf_tile, map_tile, &
+    ndf_rtile, undf_rtile, map_rtile, &
+    ndf_mode, undf_mode, map_mode, &
+    ndf_rmode, undf_rmode, map_rmode, &
+    ndf_flux, undf_flux, map_flux, &
+    ndf_bflux, undf_bflux, map_bflux, &
+    ndf_ph, undf_ph, map_ph)
 
   use radiation_config_mod, only: &
     l_rayleigh_sw, &
@@ -258,7 +315,7 @@ subroutine sw_code(nlayers, n_profile,                                         &
   use aerosol_config_mod, only: l_radaer, sulphuric_strat_climatology, &
                                 easyaerosol_sw
   use jules_control_init_mod, only: n_surf_tile
-  use socrates_init_mod, only: n_sw_band, &
+  use socrates_init_mod, only: n_sw_band, n_pathway, sw_550nm, &
     i_cloud_representation, i_overlap, i_inhom, i_cloud_entrapment, &
     i_drop_re, l_orog
   use um_physics_init_mod, only: n_aer_mode_sw, mode_dimen, sw_band_mode
@@ -295,6 +352,8 @@ subroutine sw_code(nlayers, n_profile,                                         &
   integer(i_def), intent(in) :: ndf_mode, undf_mode
   integer(i_def), intent(in) :: ndf_rmode, undf_rmode
   integer(i_def), intent(in) :: ndf_flux, undf_flux
+  integer(i_def), intent(in) :: ndf_bflux, undf_bflux
+  integer(i_def), intent(in) :: ndf_ph, undf_ph
 
   integer(i_def), dimension(ndf_wth, n_profile),   intent(in) :: map_wth
   integer(i_def), dimension(ndf_2d, n_profile),    intent(in) :: map_2d
@@ -303,6 +362,8 @@ subroutine sw_code(nlayers, n_profile,                                         &
   integer(i_def), dimension(ndf_mode, n_profile),  intent(in) :: map_mode
   integer(i_def), dimension(ndf_rmode, n_profile), intent(in) :: map_rmode
   integer(i_def), dimension(ndf_flux, n_profile),  intent(in) :: map_flux
+  integer(i_def), dimension(ndf_bflux, n_profile), intent(in) :: map_bflux
+  integer(i_def), dimension(ndf_ph, n_profile),    intent(in) :: map_ph
 
   real(r_def), dimension(undf_wth),  intent(inout), target :: &
     sw_heating_rate_rts
@@ -341,13 +402,24 @@ subroutine sw_code(nlayers, n_profile,                                         &
   real(r_def), pointer, dimension(:), intent(inout) :: & ! 2d
     cloud_top_re_rts, cloud_top_weight_rts, &
     warm_cloud_top_re_rts, warm_cloud_top_weight_rts, &
-    sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts
+    sw_down_clear_surf_rts, sw_up_clear_surf_rts, sw_up_clear_toa_rts, &
+    sw_down_clean_surf_rts, sw_up_clean_surf_rts, sw_up_clean_toa_rts, &
+    sw_down_clear_clean_surf_rts, sw_up_clear_clean_surf_rts, &
+    sw_up_clear_clean_toa_rts, &
+    sw_down_uv_surf_rts, sw_down_uv_clear_surf_rts, &
+    sw_direct_uv_surf_rts, sw_direct_uv_clear_surf_rts, &
+    sw_up_uv_surf_rts, sw_up_uv_clear_surf_rts
   real(r_def), pointer, dimension(:), intent(inout) :: & ! wth
     cloud_extinction_rts, cloud_weight_extinction_rts, &
     sw_aer_optical_depth_rts
   real(r_def), pointer, dimension(:), intent(inout) :: & ! flux
     sw_direct_rts, sw_down_rts, sw_up_rts, &
     sw_direct_clear_rts, sw_down_clear_rts, sw_up_clear_rts
+  real(r_def), pointer, dimension(:), intent(inout) :: & ! bflux
+    sw_direct_band_rts, sw_down_band_rts, sw_up_band_rts, &
+    sw_direct_clear_band_rts, sw_down_clear_band_rts, sw_up_clear_band_rts
+  real(r_def), pointer, dimension(:), intent(inout) :: & ! ph
+    photolysis_rates_rts
 
   ! Local variables for the kernel
   integer(i_def) :: n_profile_list
@@ -357,7 +429,8 @@ subroutine sw_code(nlayers, n_profile,                                         &
   integer(i_def) :: wth_0, wth_1, wth_last
   integer(i_def) :: tile_1, tile_last, rtile_1, rtile_last
   integer(i_def) :: mode_1, mode_last, rmode_1, rmode_last
-  integer(i_def) :: flux_0, flux_last, twod_1, twod_last
+  integer(i_def) :: flux_0, flux_last, bflux_0, bflux_last
+  integer(i_def) :: ph_0, ph_last, twod_1, twod_last
   type(StrDiag)  :: sw_diag
   logical        :: l_aerosol_mode
 
@@ -375,6 +448,10 @@ subroutine sw_code(nlayers, n_profile,                                         &
   rmode_last = map_rmode(1,1)+n_profile*(nlayers+1)*sw_band_mode-1
   flux_0 = map_flux(1,1)
   flux_last = map_flux(1,1)+n_profile*(nlayers+1)-1
+  bflux_0 = map_bflux(1,1)
+  bflux_last = map_bflux(1,1)+n_profile*n_sw_band*(nlayers+1)-1
+  ph_0 = map_ph(1,1)
+  ph_last = map_ph(1,1)+n_profile*n_pathway*(nlayers+1)-1
   twod_1 = map_2d(1,1)
   twod_last = map_2d(1,1)+n_profile-1
 
@@ -446,6 +523,38 @@ subroutine sw_code(nlayers, n_profile,                                         &
                     => sw_up_clear_rts(flux_0:flux_last)
     sw_diag%flux_up_clear(:, unlit_list) = 0.0_r_def
   end if
+
+  if (.not. associated(sw_direct_band_rts, empty_real_data)) then
+    sw_diag%flux_direct_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_direct_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_direct_band(:, :, unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_down_band_rts, empty_real_data)) then
+    sw_diag%flux_down_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_down_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_down_band(:, :, unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_band_rts, empty_real_data)) then
+    sw_diag%flux_up_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_up_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_up_band(:, :, unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_direct_clear_band_rts, empty_real_data)) then
+    sw_diag%flux_direct_clear_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_direct_clear_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_direct_clear_band(:, :, unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_down_clear_band_rts, empty_real_data)) then
+    sw_diag%flux_down_clear_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_down_clear_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_down_clear_band(:, :, unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_clear_band_rts, empty_real_data)) then
+    sw_diag%flux_up_clear_band(0:nlayers, 1:n_sw_band, 1:n_profile) &
+                    => sw_up_clear_band_rts(bflux_0:bflux_last)
+    sw_diag%flux_up_clear_band(:, :, unlit_list) = 0.0_r_def
+  end if
+
   if (.not. associated(sw_down_clear_surf_rts, empty_real_data)) then
     sw_diag%flux_down_clear_surf(1:n_profile) &
                     => sw_down_clear_surf_rts(twod_1:twod_last)
@@ -461,6 +570,70 @@ subroutine sw_code(nlayers, n_profile,                                         &
                     => sw_up_clear_toa_rts(twod_1:twod_last)
     sw_diag%flux_up_clear_toa(unlit_list) = 0.0_r_def
   end if
+
+  if (.not. associated(sw_down_clean_surf_rts, empty_real_data)) then
+    sw_diag%flux_down_clean_surf(1:n_profile) &
+                    => sw_down_clean_surf_rts(twod_1:twod_last)
+    sw_diag%flux_down_clean_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_clean_surf_rts, empty_real_data)) then
+    sw_diag%flux_up_clean_surf(1:n_profile) &
+                    => sw_up_clean_surf_rts(twod_1:twod_last)
+    sw_diag%flux_up_clean_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_clean_toa_rts, empty_real_data)) then
+    sw_diag%flux_up_clean_toa(1:n_profile) &
+                    => sw_up_clean_toa_rts(twod_1:twod_last)
+    sw_diag%flux_up_clean_toa(unlit_list) = 0.0_r_def
+  end if
+
+  if (.not. associated(sw_down_clear_clean_surf_rts, empty_real_data)) then
+    sw_diag%flux_down_clear_clean_surf(1:n_profile) &
+                    => sw_down_clear_clean_surf_rts(twod_1:twod_last)
+    sw_diag%flux_down_clear_clean_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_clear_clean_surf_rts, empty_real_data)) then
+    sw_diag%flux_up_clear_clean_surf(1:n_profile) &
+                    => sw_up_clear_clean_surf_rts(twod_1:twod_last)
+    sw_diag%flux_up_clear_clean_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_clear_clean_toa_rts, empty_real_data)) then
+    sw_diag%flux_up_clear_clean_toa(1:n_profile) &
+                    => sw_up_clear_clean_toa_rts(twod_1:twod_last)
+    sw_diag%flux_up_clear_clean_toa(unlit_list) = 0.0_r_def
+  end if
+
+  if (.not. associated(sw_down_uv_surf_rts, empty_real_data)) then
+    sw_diag%flux_down_uv_surf(1:n_profile) &
+                    => sw_down_uv_surf_rts(twod_1:twod_last)
+    sw_diag%flux_down_uv_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_down_uv_clear_surf_rts, empty_real_data)) then
+    sw_diag%flux_down_uv_clear_surf(1:n_profile) &
+                    => sw_down_uv_clear_surf_rts(twod_1:twod_last)
+    sw_diag%flux_down_uv_clear_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_direct_uv_surf_rts, empty_real_data)) then
+    sw_diag%flux_direct_uv_surf(1:n_profile) &
+                    => sw_direct_uv_surf_rts(twod_1:twod_last)
+    sw_diag%flux_direct_uv_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_direct_uv_clear_surf_rts, empty_real_data)) then
+    sw_diag%flux_direct_uv_clear_surf(1:n_profile) &
+                    => sw_direct_uv_clear_surf_rts(twod_1:twod_last)
+    sw_diag%flux_direct_uv_clear_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_uv_surf_rts, empty_real_data)) then
+    sw_diag%flux_up_uv_surf(1:n_profile) &
+                    => sw_up_uv_surf_rts(twod_1:twod_last)
+    sw_diag%flux_up_uv_surf(unlit_list) = 0.0_r_def
+  end if
+  if (.not. associated(sw_up_uv_clear_surf_rts, empty_real_data)) then
+    sw_diag%flux_up_uv_clear_surf(1:n_profile) &
+                    => sw_up_uv_clear_surf_rts(twod_1:twod_last)
+    sw_diag%flux_up_uv_clear_surf(unlit_list) = 0.0_r_def
+  end if
+
   if (.not. associated(cloud_top_re_rts, empty_real_data) .and. &
       .not. associated(cloud_top_weight_rts, empty_real_data)) then
     sw_diag%cloud_top_liq_dim(1:n_profile) &
@@ -490,10 +663,15 @@ subroutine sw_code(nlayers, n_profile,                                         &
     sw_diag%cloud_weight_extinction(:, unlit_list) = 0.0_r_def
   end if
 
-  ! Aerosol optical depth for SW band 3 is output (505-690nm). Once the
-  ! diagnostic infrastructure is in place the band(s) may be user defined.
+  if (.not. associated(photolysis_rates_rts, empty_real_data)) then
+    sw_diag%photolysis_rate(0:nlayers, 1:n_pathway, 1:n_profile) &
+                    => photolysis_rates_rts(ph_0:ph_last)
+    sw_diag%photolysis_rate(:, :, unlit_list) = 0.0_r_def
+  end if
+
+  ! Aerosol optical depth for SW band at 550nm
   if (.not. associated(sw_aer_optical_depth_rts, empty_real_data)) then
-    sw_diag%aerosol_optical_depth(0:nlayers, 3:3, 1:n_profile) &
+    sw_diag%aerosol_optical_depth(0:nlayers, sw_550nm:sw_550nm, 1:n_profile) &
                     => sw_aer_optical_depth_rts(wth_0:wth_last)
     sw_diag%aerosol_optical_depth(:, :, unlit_list) = 0.0_r_def
   end if
