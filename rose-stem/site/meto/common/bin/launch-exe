@@ -9,6 +9,14 @@ NAMELIST_FILE=configuration.nml
 XIOS_SERVER_EXEC_PATH="xios_server.exe"
 SLURM_MPMD_FILE="lfric_xios_mpmd"
 
+# Set to run mode or script test mode
+# if TEST_LAUNCH_EXE_EXEC is set, then it's value shall be the expected value to test
+# the behaviour of `launch-exe` and the script will error if the value
+# does not match
+if [ -n "$TEST_LAUNCH_EXE_EXEC" ] ; then
+    # the EXEC_COMMAND will not execute
+    TEST_MODE=0
+fi
 
 # Ensure Total ranks requested is at least 1
 #===========================================
@@ -191,9 +199,20 @@ else
   XIOS_EXEC=""
 fi
 
-# Launch the model
-#===========================================
+# Launch the model (Or, test the launch command)
+#===============================================
 EXEC_COMMAND="${LAUNCHER} ${LAUNCHER_OPTS} ${EXEC_PATH} ${NAMELIST_FILE} ${XIOS_EXEC}"
+
+if [ "${TEST_MODE}" = 0 ] ; then
+    # SLURM_MPMD_FILE?
+    if [ "${TEST_LAUNCH_EXE_EXEC}" = "${EXEC_COMMAND}" ] ; then
+	test_error=0
+    else
+        test_error=1
+	printf "Error: ${TEST_LAUNCH_EXE_EXEC} != ${EXEC_COMMAND}" >&2
+    fi
+    exit ${test_error}
+fi
 
 echo Execute command is:
 echo ""

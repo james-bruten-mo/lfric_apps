@@ -69,6 +69,14 @@
         inherit={{inherit.str|upper}}
         script="rose task-run --app-key=rose-stem_lint_check"
 
+{% elif "test_launch-exe" in task %}
+
+    [[{{task}}]]
+        inherit={{inherit.str|upper}}
+        script="rose task-run --app-key=test_launch-exe"
+        [[[environment]]]
+            launch_exe_meto_path = $CYLC_WORKFLOW_RUN_DIR/site/meto/common/bin/launch-exe
+
 {% elif "validate_rose_meta" in task %}
 
     [[{{task}}]]
