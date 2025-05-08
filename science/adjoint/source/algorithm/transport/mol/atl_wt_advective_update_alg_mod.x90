@@ -197,7 +197,6 @@ contains
     integer(kind=i_def) :: mesh_id
     integer(kind=i_def) :: stencil_extent
     integer(kind=i_def) :: stencil_size
-    integer(kind=i_def) :: ndata_h
 
     type(field_type), target  :: ls_remap_field, ls_field_big_halo
     type(field_type), pointer :: ls_field_ptr
@@ -218,7 +217,6 @@ contains
     end if
 
     stencil_extent = fv_horizontal_order/2_i_def
-    ndata_h = 4*stencil_size
     adv_coeffs => get_hori_wt_mol_coeffs(mesh_id)
 
     ! Copy field to a large halo version
@@ -251,8 +249,7 @@ contains
                    polyh_wtheta_koren_kernel_type(               &
                                             ls_h_reconstruction, &
                                             ls_field_ptr,        &
-                                            stencil_extent,      &
-                                            ndata_h))
+                                            stencil_extent))
 
     else
       if ( oned_reconstruction ) then
@@ -263,7 +260,6 @@ contains
                                               ls_field_ptr,        &
                                               stencil_extent,      &
                                               adv_coeffs,          &
-                                              ndata_h,             &
                                               fv_horizontal_order ) )
       else
         ! Use 2d reconstruction
@@ -273,7 +269,6 @@ contains
                                               ls_field_big_halo,   &
                                               stencil_extent,      &
                                               adv_coeffs,          &
-                                              ndata_h,             &
                                               stencil_size) )
       end if
 

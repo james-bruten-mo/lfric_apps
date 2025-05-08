@@ -78,7 +78,6 @@ contains
                                   tracer,         &
                                   stencil_size,   &
                                   stencil_map,    &
-                                  ndata,          &
                                   ndf_md,         &
                                   undf_md,        &
                                   map_md,         &

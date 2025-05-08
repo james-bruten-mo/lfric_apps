@@ -39,11 +39,10 @@ private
 !> The type declaration for the kernel. Contains the metadata needed by the PSy layer
 type, public, extends(kernel_type) :: poly1d_reconstruction_kernel_type
   private
-  type(arg_type) :: meta_args(5) = (/                                                        &
+  type(arg_type) :: meta_args(4) = (/                                                        &
        arg_type(GH_FIELD,  GH_REAL,    GH_WRITE, ANY_DISCONTINUOUS_SPACE_1 ),                &
        arg_type(GH_FIELD,  GH_REAL,    GH_READ,  ANY_DISCONTINUOUS_SPACE_2, STENCIL(CROSS)), &
        arg_type(GH_FIELD,  GH_REAL,    GH_READ,  ANY_DISCONTINUOUS_SPACE_3),                 &
-       arg_type(GH_SCALAR, GH_INTEGER, GH_READ),                                             &
        arg_type(GH_SCALAR, GH_INTEGER, GH_READ)                                              &
        /)
   integer :: operates_on = CELL_COLUMN
@@ -65,7 +64,6 @@ contains
 !> @param[in]     stencil_size   Size of the stencil (number of cells)
 !> @param[in]     stencil_map    Dofmaps for the stencil
 !> @param[in]     coeff          Array of polynomial coefficients for interpolation
-!> @param[in]     ndata          Number of data points per dof location
 !> @param[in]     order          Desired order of polynomial reconstruction
 !> @param[in]     ndf_md         Number of degrees of freedom per cell for reconstructed field
 !> @param[in]     undf_md        Number of unique degrees of freedom for the
@@ -83,7 +81,6 @@ subroutine poly1d_reconstruction_code( nlayers,        &
                                        stencil_size,   &
                                        stencil_map,    &
                                        coeff,          &
-                                       ndata,          &
                                        order,          &
                                        ndf_md,         &
                                        undf_md,        &
@@ -108,7 +105,6 @@ subroutine poly1d_reconstruction_code( nlayers,        &
   integer(kind=i_def), intent(in)                    :: ndf_c
   integer(kind=i_def), intent(in)                    :: undf_c
   integer(kind=i_def), dimension(ndf_c),  intent(in) :: map_c
-  integer(kind=i_def), intent(in)                    :: ndata
   integer(kind=i_def), intent(in)                    :: order
   integer(kind=i_def), intent(in)                    :: stencil_size
 

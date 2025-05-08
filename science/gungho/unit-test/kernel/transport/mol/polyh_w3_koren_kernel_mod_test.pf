@@ -70,7 +70,6 @@ contains
                               density,      &
                               stencil_size, &
                               smap,         &
-                              ndata,        &
                               ndf_md,       &
                               undf_md,      &
                               map_md,       &

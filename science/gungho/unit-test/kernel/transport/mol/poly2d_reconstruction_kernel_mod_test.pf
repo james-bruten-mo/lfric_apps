@@ -95,7 +95,6 @@ contains
                                      stencil_size,         &
                                      stencil_map,          &
                                      coeff,                &
-                                     ndata,                &
                                      stencil_size,         &
                                      ndf_md,               &
                                      undf_md,              &

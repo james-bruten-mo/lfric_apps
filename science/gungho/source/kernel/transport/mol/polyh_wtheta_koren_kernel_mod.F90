@@ -16,8 +16,7 @@
 module polyh_wtheta_koren_kernel_mod
 
 use argument_mod,      only : arg_type, func_type,         &
-                              GH_FIELD, GH_SCALAR,         &
-                              GH_REAL, GH_INTEGER,         &
+                              GH_FIELD, GH_REAL,           &
                               GH_READWRITE, GH_READ,       &
                               STENCIL, CROSS,              &
                               CELL_COLUMN,                 &
@@ -36,10 +35,9 @@ private
 !> The type declaration for the kernel. Contains the metadata needed by the PSy layer
 type, public, extends(kernel_type) :: polyh_wtheta_koren_kernel_type
   private
-  type(arg_type) :: meta_args(3) = (/                                            &
+  type(arg_type) :: meta_args(2) = (/                                            &
        arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1), &
-       arg_type(GH_FIELD,  GH_REAL,    GH_READ,      Wtheta, STENCIL(CROSS)),    &
-       arg_type(GH_SCALAR, GH_INTEGER, GH_READ)                                  &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,      Wtheta, STENCIL(CROSS))     &
        /)
   integer :: operates_on = CELL_COLUMN
 contains
@@ -59,7 +57,6 @@ contains
 !> @param[in]     tracer         Pointwise tracer field to reconstruct
 !> @param[in]     stencil_size   Size of the stencil (number of cells)
 !> @param[in]     stencil_map    Dofmaps for the stencil
-!> @param[in]     ndata          Number of data points per dof location
 !> @param[in]     ndf_md         Number of degrees of freedom per cell
 !> @param[in]     undf_md        Number of unique degrees of freedom for the
 !!                               reconstructed field
@@ -72,7 +69,6 @@ subroutine polyh_wtheta_koren_code(  nlayers,              &
                                      tracer,               &
                                      stencil_size,         &
                                      stencil_map,          &
-                                     ndata,                &
                                      ndf_md,               &
                                      undf_md,              &
                                      map_md,               &
@@ -90,7 +86,6 @@ subroutine polyh_wtheta_koren_code(  nlayers,              &
   integer(kind=i_def), intent(in)                     :: ndf_md
   integer(kind=i_def), intent(in)                     :: undf_md
   integer(kind=i_def), dimension(ndf_md),  intent(in) :: map_md
-  integer(kind=i_def), intent(in)                     :: ndata
   integer(kind=i_def), intent(in)                     :: stencil_size
 
   real(kind=r_tran), dimension(undf_md),  intent(inout) :: reconstruction

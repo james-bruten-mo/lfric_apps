@@ -35,12 +35,11 @@ private
 !-------------------------------------------------------------------------------
 !> The type declaration for the kernel. Contains the metadata needed by the PSy layer
 type, public, extends(kernel_type) :: adj_poly1d_reconstruction_kernel_type
-type(arg_type) :: meta_args(6) = (/                                                            &
+type(arg_type) :: meta_args(5) = (/                                                            &
      arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_1),                 & ! reconstruction
      arg_type(GH_FIELD,  GH_REAL,    GH_READWRITE, ANY_DISCONTINUOUS_SPACE_2),                 & ! tracer
      arg_type(GH_FIELD,  GH_REAL,    GH_READ,      ANY_DISCONTINUOUS_SPACE_2, STENCIL(CROSS)), & ! dummy_ads2
      arg_type(GH_FIELD,  GH_REAL,    GH_READ,      ANY_DISCONTINUOUS_SPACE_3),                 & ! coeff
-     arg_type(gh_scalar, GH_INTEGER, GH_READ),                                                 & ! ndata
      arg_type(gh_scalar, GH_INTEGER, GH_READ)                                                  & ! order
      /)
 integer :: operates_on = CELL_COLUMN
@@ -61,7 +60,6 @@ contains
 !> @param[in]     stencil_size   Size of the stencil (number of cells)
 !> @param[in]     stencil_map    Dofmaps for the stencil
 !> @param[in]     coeff          Array of polynomial coefficients for interpolation
-!> @param[in]     ndata          Number of data points per dof location
 !> @param[in]     order          Desired order of polynomial reconstruction
 !> @param[in]     ndf_md         Number of degrees of freedom per cell for reconstructed field
 !> @param[in]     undf_md        Number of unique degrees of freedom for the
@@ -80,7 +78,6 @@ subroutine adj_poly1d_reconstruction_code( nlayers, &
                                            stencil_size, &
                                            stencil_map, &
                                            coeff, &
-                                           ndata, &
                                            order, &
                                            ndf_md, &
                                            undf_md, &
@@ -104,7 +101,6 @@ subroutine adj_poly1d_reconstruction_code( nlayers, &
   integer(kind=i_def), intent(in)                                 :: ndf_c
   integer(kind=i_def), intent(in)                                 :: undf_c
   integer(kind=i_def), dimension(ndf_c), intent(in)               :: map_c
-  integer(kind=i_def), intent(in)                                 :: ndata
   integer(kind=i_def), intent(in)                                 :: order
   integer(kind=i_def), intent(in)                                 :: stencil_size
   real(kind=r_tran), dimension(undf_md), intent(inout)            :: reconstruction
