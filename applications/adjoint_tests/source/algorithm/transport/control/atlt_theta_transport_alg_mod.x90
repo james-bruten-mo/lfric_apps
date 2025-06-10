@@ -165,7 +165,8 @@ module atlt_theta_transport_alg_mod
                  setval_x( theta_inc_inp, theta_inc ), &
                  setval_random( theta_in ),            &
                  setval_x( theta_in_inp, theta_in ),   &
-                 setval_random( ls_theta_in ) )
+                 setval_random( ls_theta_in ),         &
+                 inc_a_times_X( 1.0E12_r_def, ls_theta_in ) ) ! Inflate LS theta to avoid numerical issues
 
     ! Tangent linear
     call tl_theta_transport_alg( theta_out, theta_inc, theta_in, ls_theta_in, &

@@ -17,7 +17,6 @@ module adjoint_test_driver_mod
   use log_mod,                     only : log_event, LOG_LEVEL_INFO
   use mesh_mod,                    only : mesh_type
   use mesh_collection_mod,         only : mesh_collection
-  use operator_mod,                only : operator_type
   use sci_geometric_constants_mod, only : get_coordinates, &
                                           get_panel_id
 
@@ -111,10 +110,6 @@ contains
     ! ./timestepping
     use atlt_si_timestep_alg_mod,                   only : atlt_si_timestep_alg
 
-    ! Misc
-    use setup_test_alg_mod,                         only : setup_test_constants, &
-                                                           reset_mass_matrices
-
     implicit none
 
     ! Arguments
@@ -125,14 +120,11 @@ contains
     type(field_type),          pointer :: panel_id
     type(mesh_type),           pointer :: mesh
     type(mesh_type),           pointer :: twod_mesh
-    type(operator_type)                :: m3_inv_copy
-    type(field_type)                   :: mt_lumped_inv_copy
 
     mesh => mesh_collection%get_mesh( prime_mesh_name )
     chi => get_coordinates( mesh%get_id() )
     panel_id => get_panel_id( mesh%get_id() )
     twod_mesh => mesh_collection%get_mesh( mesh, TWOD )
-    call setup_test_constants( mesh, m3_inv_copy, mt_lumped_inv_copy )
 
     call log_event( "TESTING generated adjoint kernels", LOG_LEVEL_INFO )
     call run_gen_adj_kernel_tests( mesh, chi, panel_id )
@@ -205,9 +197,6 @@ contains
     call atlt_derive_exner_from_eos_alg( mesh )
     call atlt_moist_dyn_factors_alg( mesh )
 
-    ! Restore inverse mass matrices to original values for use in solver/timestepping tests
-    call reset_mass_matrices( mesh, m3_inv_copy, mt_lumped_inv_copy )
-
     ! ./solver
     call adjt_pressure_precon_alg( modeldb, mesh, modeldb%clock )
     call adjt_mixed_operator_alg( mesh, modeldb%clock )
@@ -216,7 +205,8 @@ contains
     call adjt_semi_implicit_solver_step_alg( modeldb, mesh, modeldb%clock )
 
     ! ./timestepping
-    call atlt_si_timestep_alg( modeldb, mesh, twod_mesh )
+    call atlt_si_timestep_alg( modeldb, mesh, twod_mesh, 1 )
+    call atlt_si_timestep_alg( modeldb, mesh, twod_mesh, 2 )
 
     call log_event( "TESTING COMPLETE", LOG_LEVEL_INFO )
 

@@ -155,7 +155,8 @@ module atlt_wind_transport_alg_mod
                  setval_x( rhs_u_inp, rhs_u ),   &
                  setval_random( wind_n ),        &
                  setval_x( wind_n_inp, wind_n ), &
-                 setval_random( ls_wind_n ) )
+                 setval_random( ls_wind_n ),     &
+                 inc_a_times_X( 1.0E12_r_def, ls_wind_n ) ) ! Inflate LS wind to avoid numerical issues
 
 
     ! Tangent linear

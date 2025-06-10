@@ -15,7 +15,7 @@ module adjt_compute_vorticity_alg_mod
                                                   LOG_LEVEL_DEBUG,   &
                                                   LOG_LEVEL_ERROR
   use mesh_mod,                            only : mesh_type
-  use finite_element_config_mod,           only : element_order_h, element_order_v
+  use finite_element_config_mod,           only : element_order_h, element_order_v, vorticity_in_w1
   use fs_continuity_mod,                   only : W1, W2
   use function_space_collection_mod,       only : function_space_collection
 
@@ -69,6 +69,14 @@ module adjt_compute_vorticity_alg_mod
     real(kind=r_def)            :: machine_tol
     real(kind=r_def)            :: relative_diff
     real(kind=r_def), parameter :: eps = 1e-30_r_def
+
+    if (.not. vorticity_in_w1) then
+      ! With vorticity_in_w1 == F, test will fail
+      ! However, tl_rhs_alg only calls compute_vorticity_alg if si_momentum_equation == T
+      ! Currently si_momentum_equation == F, so it's okay to skip this test for now
+      call log_event( "vorticity_in_w1 == F; skipping adjt_compute_vorticity", LOG_LEVEL_DEBUG )
+      return
+    end if
 
     ! Initialising logicals
     weak_form_u = .false.

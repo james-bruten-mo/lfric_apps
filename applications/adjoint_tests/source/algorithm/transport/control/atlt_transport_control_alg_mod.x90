@@ -78,12 +78,15 @@ module atlt_transport_control_alg_mod
       call ls_mr_in(imr) % initialise( vector_space = vector_space_wtheta_ptr )
     end do
 
-    ! Init LS
-    call invoke( setval_random( ls_advected_fields(igh_u) ),              &
-                 setval_random( ls_advected_fields(igh_t) ),              &
-                 setval_random( ls_advected_fields(igh_p) ),              &
-                 setval_random( ls_advected_fields(igh_d) ),              &
-                 setval_random( ls_wind_np1 ),                            &
+    ! Init LS; some fields are inflated to avoid numerical issues
+    call invoke( setval_random( ls_advected_fields(igh_u) ),               &
+                 inc_a_times_X( 1.0E12_r_def, ls_advected_fields(igh_u) ), &
+                 setval_random( ls_advected_fields(igh_t) ),               &
+                 inc_a_times_X( 1.0E12_r_def, ls_advected_fields(igh_t) ), &
+                 setval_random( ls_advected_fields(igh_p) ),               &
+                 setval_random( ls_advected_fields(igh_d) ),               &
+                 inc_a_times_X( 1.0E12_r_def, ls_advected_fields(igh_d) ), &
+                 setval_random( ls_wind_np1 ),                             &
                  setval_random( ls_wind_n ) )
 
     do imr = 1, nummr
