@@ -1,4 +1,4 @@
-{% set gadi_base = 'module load /g/data/access/ngm/modules/envs/lfric/202412/intel-openmpi' %}
+{% set gadi_base = 'module load /g/data/access/ngm/modules/envs/lfric/202507/intel-openmpi' %}
 
 {% set gadi_plot = 'module load /g/data/access/ngm/modules/analysis3/21.10' %}
 
@@ -20,6 +20,7 @@
         [[[directives]]]
           -l jobfs=2GB
           -q=normal
+          -l walltime=02:00:00
           -W umask=0022
           -l storage=gdata/access+gdata/hr22+gdata/ki32+scratch/access+gdata/{{environ.get('PROJECT','NO_PROJECT')}}
 

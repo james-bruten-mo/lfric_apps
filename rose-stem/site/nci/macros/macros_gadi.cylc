@@ -11,7 +11,13 @@
                         ranks_per_node=0,
                         ranks_depth_pad=1) %}
 
+    {% set cpus_per_node = 48 %}
+    {% if threads > 1 %}
+            {% set num_nodes = ((mpi_ranks|int * threads|int + xios_nodes|int)/(cpus_per_node|int)) | round (0, 'ceil') | int %}
+            -l ncpus={{num_nodes|int * cpus_per_node|int}}
+    {% else %}
             -l ncpus={{mpi_ranks|int * threads|int + xios_nodes|int}}
+    {% endif %}
 
     {% set gb_per_core = 4 %}
     {% set total_mem = gb_per_core*(mpi_ranks|int * threads|int + xios_nodes|int) %}
