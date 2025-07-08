@@ -27,7 +27,7 @@ class TLTest(LFRicLoggingTest):
         if 'MPIEXEC_BROKEN' in os.environ:
             TLTest.set_mpiexec_broken()
         super(TLTest, self).__init__([sys.argv[1],
-                                      'runge_kutta_configuration.nml',
+                                      'resources/runge_kutta_configuration.nml',
                                       'test_' + self._flag],
                                      processes=1,
                                      name='tl_test.Log')

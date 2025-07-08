@@ -110,15 +110,10 @@ unit-tests: unit-tests/run
 ###############################################################################
 # Integration tests
 #
-#integration-tests/%: export ADDITIONAL_EXTRACTION = /source \
-#                                                    $(CORE_ROOT_DIR)/components/driver/source \
-#                                                    $(CORE_ROOT_DIR)/components/inventory \
-#                                                    /source
+integration-tests/%: export ADDITIONAL_EXTRACTION = \
+                                integration-test/support/tiny_world.nc
 integration-tests/%: export BIN_DIR      ?= $(PROJECT_DIR)/test
-integration-tests/%: export IMPORT_PARTS  = $(CORE_ROOT_DIR)/infrastructure \
-                                            $(CORE_ROOT_DIR)/components/science \
-                                            $(CORE_ROOT_DIR)/components/lfric-xios \
-                                            $(CORE_ROOT_DIR)/components/driver
+integration-tests/%: export IMPORT_PARTS  = $(INTERNAL_DEPENDENCIES)
 integration-tests/%: export META_FILE_DIR = rose-meta/lfric-gungho/HEAD
 integration-tests/%: export PROJECT       = gungho
 integration-tests/%: export SOURCE_DIR    = source

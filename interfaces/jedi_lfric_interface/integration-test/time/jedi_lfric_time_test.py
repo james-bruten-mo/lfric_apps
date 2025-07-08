@@ -28,7 +28,7 @@ class LFRicTimeTest(LFRicLoggingTest):
         if 'MPIEXEC_BROKEN' in os.environ:
             LFRicTimeTest.set_mpiexec_broken()
         super().__init__([sys.argv[1],
-                          'jedi_lfric_time_test_configuration.nml',
+                          'resources/jedi_lfric_time_test_configuration.nml',
                           'test_' + self._flag,
                           self._optional_arg],
                          processes=1,

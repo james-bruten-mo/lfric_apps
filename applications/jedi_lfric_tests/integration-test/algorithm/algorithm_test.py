@@ -26,7 +26,7 @@ class JediLfricTest(LFRicLoggingTest):
         if 'MPIEXEC_BROKEN' in os.environ:
             JediLfricTest.set_mpiexec_broken()
         super().__init__([sys.argv[1],
-                          'algorithm_test_configuration.nml',
+                          'resources/algorithm_test_configuration.nml',
                           'test_' + self._flag],
                          processes=1,
                          name='JediLfricTest.Log')

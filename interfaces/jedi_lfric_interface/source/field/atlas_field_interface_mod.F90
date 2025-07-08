@@ -44,6 +44,7 @@ module atlas_field_interface_mod
                                             LOG_LEVEL_ERROR
   use abstract_external_field_mod,   only : abstract_external_field_type
   use field_mod,                     only : field_type, field_proxy_type
+  use field_parent_mod,              only : field_parent_type
   use fs_continuity_mod,             only : W3, Wtheta, name_from_functionspace
   use constants_mod,                 only : i_def, str_def, l_def
 
@@ -154,10 +155,17 @@ subroutine field_initialiser( self, atlas_data_ptr, map_horizontal_ptr, &
   integer(i_def)                     :: n_horizontal_lfric
   integer(i_def)                     :: n_vertical_lfric
   type( field_proxy_type )           :: field_proxy
+  class(field_parent_type), pointer  :: cast_field
   logical( kind=l_def )              :: fill_direction_up_local
 
   ! Initialise the abstract parent
-  call self%abstract_external_field_initialiser( lfric_field_ptr )
+  !
+  ! This little dance with pointers is needed to keep some compilers
+  ! happy that you can, in fact, pass a child class to an argument
+  ! expecting a parent class.
+  !
+  cast_field => lfric_field_ptr
+  call self%abstract_external_field_initialiser( cast_field )
 
   ! Mandated inputs
   self%atlas_data => atlas_data_ptr
@@ -299,7 +307,6 @@ subroutine copy_from_lfric(self, return_code)
   class( atlas_field_interface_type ), intent(inout) :: self
   integer(i_def),              optional, intent(out) :: return_code
 
-  type( field_type ), pointer :: lfric_field_ptr
   type( field_proxy_type )    :: field_proxy
   integer(i_def)              :: lfric_kstart
   integer(i_def)              :: lfric_ij
@@ -310,8 +317,15 @@ subroutine copy_from_lfric(self, return_code)
   integer(i_def)              :: atlas_kdirection
   integer(i_def)              :: n_vertical_lfric
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  field_proxy = lfric_field_ptr%get_proxy()
+  select type(field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    field_proxy = field_ptr%get_proxy()
+  class default
+    call log_event(                                                          &
+      "Unexpected field type in atlas_field_interface_type%copy_from_lfric", &
+      log_level_error                                                        &
+    )
+  end select  
 
   ! Get indices for atlas and LFRic data
   atlas_kstart = self % atlas_kstart
@@ -345,7 +359,6 @@ subroutine copy_to_lfric( self, return_code )
   class( atlas_field_interface_type ), intent(inout) :: self
   integer(i_def),              intent(out), optional :: return_code
 
-  type( field_type ), pointer :: lfric_field_ptr
   type( field_proxy_type )    :: field_proxy
   integer(i_def)              :: lfric_kstart
   integer(i_def)              :: ij
@@ -356,8 +369,15 @@ subroutine copy_to_lfric( self, return_code )
   integer(i_def)              :: atlas_kdirection
   integer(i_def)              :: n_vertical_lfric
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  field_proxy = lfric_field_ptr%get_proxy()
+  select type (field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    field_proxy = field_ptr%get_proxy()
+  class default
+    call log_event(                                                        &
+      "Unexpected field type in atlas_field_interface_type%copy_to_lfric", &
+      log_level_error                                                      &
+    )
+  end select  
 
   ! Get indices for atlas and LFRic data
   lfric_kstart = self%lfric_kstart
@@ -412,7 +432,6 @@ subroutine copy_from_lfric_ad(self)
 
   class( atlas_field_interface_type ), intent(inout) :: self
 
-  type( field_type ), pointer :: lfric_field_ptr
   type( field_proxy_type )    :: field_proxy
   integer(i_def)              :: lfric_kstart
   integer(i_def)              :: ij
@@ -423,8 +442,15 @@ subroutine copy_from_lfric_ad(self)
   integer(i_def)              :: atlas_kdirection
   integer(i_def)              :: n_vertical_lfric
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  field_proxy = lfric_field_ptr%get_proxy()
+  select type (field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    field_proxy = field_ptr%get_proxy()
+  class default
+    call log_event(                                                             &
+      "Unexpected field type in atlas_field_interface_type%copy_from_lfric_ad", &
+      log_level_error                                                           &
+    )
+  end select  
 
   ! Get indices for atlas and LFRic data
   atlas_kstart = self % atlas_kstart
@@ -460,7 +486,6 @@ subroutine copy_to_lfric_ad( self )
 
   class( atlas_field_interface_type ), intent(inout) :: self
 
-  type( field_type ), pointer :: lfric_field_ptr
   type( field_proxy_type )    :: field_proxy
   integer(i_def)              :: lfric_kstart
   integer(i_def)              :: ij
@@ -471,8 +496,15 @@ subroutine copy_to_lfric_ad( self )
   integer(i_def)              :: atlas_kdirection
   integer(i_def)              :: n_vertical_lfric
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  field_proxy = lfric_field_ptr%get_proxy()
+  select type (field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    field_proxy = field_ptr%get_proxy()
+  class default
+    call log_event(                                                           &
+      "Unexpected field type in atlas_field_interface_type%copy_to_lfric_ad", &
+      log_level_error                                                         &
+    )
+  end select  
 
   ! Get indices for atlas and LFRic data
   lfric_kstart = self%lfric_kstart
@@ -527,14 +559,20 @@ subroutine zero_lfric( self )
 
   class( atlas_field_interface_type ), intent(inout) :: self
 
-  type( field_type ), pointer :: lfric_field_ptr
   type( field_proxy_type )    :: field_proxy
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  field_proxy = lfric_field_ptr%get_proxy()
+  select type (field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    field_proxy = field_ptr%get_proxy()
 
-  ! Set all data to zero
-  field_proxy%data(:) = 0.0_real64
+    ! Set all data to zero
+    field_proxy%data(:) = 0.0_real64
+  class default
+    call log_event(                                                     &
+      "Unexpected field type in atlas_field_interface_type%zero_lfric", &
+      log_level_error                                                   &
+    )
+  end select  
 
 end subroutine zero_lfric
 
@@ -558,11 +596,17 @@ function get_lfric_name( self ) result( lfric_name )
   implicit none
 
   class( atlas_field_interface_type ), intent(in) :: self
-  type( field_type ), pointer                     :: lfric_field_ptr
   character( len=str_def )                        :: lfric_name
 
-  lfric_field_ptr => self%get_lfric_field_ptr()
-  lfric_name = lfric_field_ptr%get_name()
+  select type(field_ptr => self%get_lfric_field_ptr())
+  class is (field_type)
+    lfric_name = field_ptr%get_name()
+  class default
+    call log_event(                                                         &
+      "Unexpected field type in atlas_field_interface_type%get_lfric_name", &
+      log_level_error                                                       &
+    )
+  end select
 
 end function get_lfric_name
 

@@ -79,8 +79,8 @@ def determine_application_path(application, root_dir):
     Returns a relative path from this file to the makefile directory
     """
 
-    # Find the application in either science/ or applications/
-    for drc in ["science/", "applications/"]:
+    # Find the application in either science/ interfaces/ or applications/
+    for drc in ["science/", "interfaces/", "applications/"]:
         path = os.path.join(root_dir, drc)
         for item in os.listdir(path):
             item_path = os.path.join(path, item)

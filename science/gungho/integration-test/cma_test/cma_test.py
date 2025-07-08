@@ -23,7 +23,7 @@ class CMATest(six.with_metaclass(ABCMeta, LFRicLoggingTest)):
     if 'MPIEXEC_BROKEN' in os.environ:
       CMATest.set_mpiexec_broken()
     super(CMATest, self).__init__( [sys.argv[1],
-                                    'cma_test_configuration.nml',
+                                    'resources/cma_test_configuration.nml',
                                     'test_' + self._flag],
                                     processes=1,
                                     name='cma_test.Log' )

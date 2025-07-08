@@ -1,5 +1,5 @@
 &base_mesh
-file_prefix='mesh_C6',
+file_prefix='resources/mesh_C6',
 geometry='spherical',
 prepartitioned=.false.,
 prime_mesh_name='C6',
