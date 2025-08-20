@@ -102,15 +102,6 @@ def make_figure(plotpath, nx, ny, field, component, timestep):
     matplotlib.rcParams['contour.negative_linestyle'] = 'solid'
     cf = plt.contourf(x_i * r2d, y_i * r2d, np.round(dz, 10),
                       cc, cmap=c_map, extend='min')
-    cl = plt.contour(x_i * r2d, y_i * r2d, np.round(dz, 10), cc,
-                     linewidths=2.0, colors='k', linestyle="",
-                     extend='min')
-
-    # -1K contour (x,z) coordinates
-    minusonek_idx = np.where(cl.levels == -1)[0][0]
-    minusonek_cont = cl.collections[minusonek_idx].get_paths()[0]
-    # Front position, i.e. first intersection (negative x!) with x=0
-    fp = minusonek_cont.vertices[0, 0]
     plt.axes().set_aspect(.8)
     plt.axis([0, 16, 0, 5])
     plt.xlabel("x (km)", fontsize=28)
@@ -122,7 +113,7 @@ def make_figure(plotpath, nx, ny, field, component, timestep):
     plt.tick_params(axis='both', labelsize=28)
 
     # Front position is symmetrized
-    print(nx, np.min(dz), np.max(dz), -fp)
+    print(nx, np.min(dz), np.max(dz))
 
     out_file_name = plotpath + "/" + 'straka_x_' + field + "_" + timestep \
         + ".png"

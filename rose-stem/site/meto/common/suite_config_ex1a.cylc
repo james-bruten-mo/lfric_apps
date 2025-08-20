@@ -36,7 +36,7 @@
 {% set set_ulimit = 'ulimit -s unlimited -c unlimited; '~
                     'ulimit -a '%}
 
-{% set ex1a_scitools = 'module load scitools/production-os46-3' %}
+{% set ex1a_scitools = 'module load scitools/production-os47-1' %}
 {% set ex1a_tech = '' %}
 
 {% set ex1a_perftools = 'module load perftools' %}
@@ -123,20 +123,17 @@
     [[EX1A_MESH_GNU]]
         inherit=EX1A_GNU,EX1A_MESH
         {{ generate_script("pre-script", [ex1a_base,
-                                          ex1a_compiler_gnu,
-                                          ex1a_scitools]) }}
+                                          ex1a_compiler_gnu]) }}
 
     [[EX1A_MESH_CCE]]
         inherit=EX1A_CCE,EX1A_MESH
         {{ generate_script("pre-script", [ex1a_base,
-                                          ex1a_compiler_cce,
-                                          ex1a_scitools]) }}
+                                          ex1a_compiler_cce]) }}
 
     [[EX1A_MESH_PERFTOOLS-GNU]]
         inherit=EX1A_GNU,EX1A_MESH
         {{ generate_script("pre-script", [ex1a_base,
                                           ex1a_compiler_gnu,
-                                          ex1a_scitools,
                                           ex1a_tech,
                                           ex1a_perftools]) }}
 
@@ -176,7 +173,7 @@
         inherit = EX1A_BASE
         pre-script = """
                      module load nccmp/1.9.1.0
-                     module load scitools/production-os46-3
+                     module load scitools/production-os47-1
                      module load um_tools/2023.08.1/openmp
                      export ROSE_PYTHONPATH="$PYTHONPATH"
                      module list 2>&1
