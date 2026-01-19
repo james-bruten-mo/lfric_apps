@@ -1,4 +1,4 @@
-# LFRic Apps
+# LFRic Apps edit
 
 [![ci](https://github.com/MetOffice/lfric_apps/actions/workflows/ci.yml/badge.svg)](https://github.com/MetOffice/lfric_apps/actions/workflows/ci.yml)
 
