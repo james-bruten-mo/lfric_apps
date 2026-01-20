@@ -1,11 +1,11 @@
 import argparse
 import subprocess
 import os
-import tempfile
 import yaml
-from shutil import rmtree
 from pathlib import Path
 from typing import Dict, List
+from get_git_sources import get_source
+import shlex
 
 
 def run_command(command):
@@ -14,7 +14,7 @@ def run_command(command):
     Inputs:
         - command, str with command to run
     """
-    command = command.split()
+    command = shlex.split(command)
     result = subprocess.run(
         command,
         capture_output=True,
@@ -40,24 +40,6 @@ def load_yaml(fpath: Path) -> Dict:
     return sources
 
 
-def clone_dependency(values: Dict, temp_dep: Path) -> None:
-    """
-    Clone the physics dependencies into a temporary directory
-    """
-
-    source = values["source"]
-    ref = values["ref"]
-
-    commands = (
-        f"git -C {temp_dep} init",
-        f"git -C {temp_dep} remote add origin {source}",
-        f"git -C {temp_dep} fetch origin {ref}",
-        f"git -C {temp_dep} checkout FETCH_HEAD"
-    )
-    for command in commands:
-        run_command(command)
-
-
 def extract_files(dependency: str, values: Dict, files: List[str], working: Path):
     """
     Clone the dependency to a temporary location
@@ -65,30 +47,41 @@ def extract_files(dependency: str, values: Dict, files: List[str], working: Path
     Then delete the temporary directory
     """
 
-    tempdir = Path(tempfile.mkdtemp())
+    use_mirrors: bool = (os.getenv('LOCAL_BUILD_MIRRORS', 'False') == 'True')
+    mirror_loc: Path = os.getenv("MIRROR_LOC")
+
     if (
         "PHYSICS_ROOT" not in os.environ
         or not Path(os.environ["PHYSICS_ROOT"]).exists()
     ):
-        temp_dep = tempdir / dependency
-        temp_dep.mkdir(parents=True)
-        clone_dependency(values, temp_dep)
+        clone_loc = working / "clones" / dependency
+        get_source(
+            values["source"],
+            values["ref"],
+            clone_loc,
+            dependency,
+            use_mirrors,
+            mirror_loc
+        )
     else:
-        temp_dep = Path(os.environ["PHYSICS_ROOT"]) / dependency
+        clone_loc = Path(os.environ["PHYSICS_ROOT"]) / dependency
 
-    working_dep = working / dependency
+    working_dep = working / "scratch" / dependency
 
     # make the working directory location
-    working_dep.mkdir(parents=True)
+    working_dep.mkdir(parents=True, exist_ok=True)
 
+    # rsync extract files from clone loc to the working directory
+    copy_command = "rsync --include='**/' "
     for extract_file in files:
-        source_file = temp_dep / extract_file
-        dest_file = working_dep / extract_file
-        run_command(f"mkdir -p {dest_file.parents[0]}")
-        copy_command = f"cp -r {source_file} {dest_file}"
-        run_command(copy_command)
-
-    rmtree(tempdir)
+        if not extract_file:
+            continue
+        if Path(clone_loc / extract_file).is_dir():
+            extract_file = extract_file.rstrip("/")
+            extract_file += "/**"
+        copy_command += f"--include='{extract_file}' "
+    copy_command += f"--exclude='*' -avmq {clone_loc}/ {working_dep}"
+    run_command(copy_command)
 
 
 def parse_args() -> argparse.Namespace:

@@ -93,7 +93,6 @@ def build_makefile(
     target,
     optlevel,
     psyclone,
-    um_fcm_platform,
     verbose,
 ):
     """
@@ -116,8 +115,6 @@ def build_makefile(
         make_command += f"PROFILE={optlevel} "
     if psyclone:
         make_command += f"PSYCLONE_TRANSFORMATION={psyclone} "
-    if um_fcm_platform:
-        make_command += f"UM_FCM_TARGET_PLATFORM={um_fcm_platform} "
     if verbose:
         make_command += "VERBOSE=1 "
 
@@ -187,20 +184,17 @@ def main():
         "Defaults to the makefile default",
     )
     parser.add_argument(
-        "-u",
-        "--um_fcm_platform",
-        default=None,
-        help="Value passed to UM_FCM_TARGET_PLATFORM variable in makefile, "
-        "used for build settings for extracted UM physics. Defaults to the "
-        "makefile default.",
-    )
-    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
         help="Request verbose output from the makefile ",
     )
     args = parser.parse_args()
+
+    # If using mirrors, set environment variable for science extract step
+    if args.mirrors:
+        os.environ["USE_MIRRORS"] = True
+        os.environ["LOCAL_BUILD_MIRRORS"] = args.mirror_loc
 
     # Find the root directory of the working copy
     root_dir = get_root_path()
@@ -231,8 +225,8 @@ def main():
         core_source["ref"],
         args.working_dir / "scratch" / "lfric_core",
         "lfric_core",
-        use_mirrors=args.mirrors,
-        mirror_loc=args.mirror_loc,
+        args.mirrors,
+        args.mirror_loc,
     )
 
     # Build the makefile
@@ -245,7 +239,6 @@ def main():
         args.target,
         args.optlevel,
         args.psyclone,
-        args.um_fcm_platform,
         args.verbose,
     )
 
