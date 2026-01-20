@@ -54,7 +54,7 @@ def extract_files(dependency: str, values: Dict, files: List[str], working: Path
         "PHYSICS_ROOT" not in os.environ
         or not Path(os.environ["PHYSICS_ROOT"]).exists()
     ):
-        clone_loc = working / "clones" / dependency
+        clone_loc = working / ".." / "scratch" / dependency
         get_source(
             values["source"],
             values["ref"],
@@ -66,10 +66,10 @@ def extract_files(dependency: str, values: Dict, files: List[str], working: Path
     else:
         clone_loc = Path(os.environ["PHYSICS_ROOT"]) / dependency
 
-    working_dep = working / "scratch" / dependency
 
     # make the working directory location
-    working_dep.mkdir(parents=True, exist_ok=True)
+    working_dir = working / dependency
+    working_dir.mkdir(parents=True, exist_ok=True)
 
     # rsync extract files from clone loc to the working directory
     copy_command = "rsync --include='**/' "
@@ -80,7 +80,7 @@ def extract_files(dependency: str, values: Dict, files: List[str], working: Path
             extract_file = extract_file.rstrip("/")
             extract_file += "/**"
         copy_command += f"--include='{extract_file}' "
-    copy_command += f"--exclude='*' -avmq {clone_loc}/ {working_dep}"
+    copy_command += f"--exclude='*' -avmq {clone_loc}/ {working_dir}"
     run_command(copy_command)
 
 
@@ -94,10 +94,10 @@ def parse_args() -> argparse.Namespace:
         "-d",
         "--dependencies",
         default="./dependencies.yaml",
-        help="The dependencies file for the apps working copy.",
+        help="The dependencies file for the apps working copy",
     )
     parser.add_argument(
-        "-w", "--working", default=".", help="Location to perform extract steps in."
+        "-w", "--working", default=".", help="Build location"
     )
     parser.add_argument(
         "-e",
