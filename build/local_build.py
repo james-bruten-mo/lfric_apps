@@ -131,7 +131,7 @@ def main():
     )
     parser.add_argument(
         "project",
-        help="project to build. Will search in both " "science and projects dirs.",
+        help="project to build. Will search in both science and projects dirs.",
     )
     parser.add_argument(
         "-c",
