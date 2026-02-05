@@ -26,3 +26,4 @@
 | maggiehendry     | Maggie Hendry      | Met Office                       | 2026-01-29 |
 | stevemullerworth | Steve Mullerworth  | Met Office                       | 2026-01-28 |
 | jameskent-metoffice | James Kent      | Met Office                       | 2026-01-21 |
+| cjohnson-pi      | Christine Johnson  | Met Office                       | 2026-01-19 |
