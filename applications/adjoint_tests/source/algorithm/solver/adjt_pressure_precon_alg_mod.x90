@@ -99,6 +99,7 @@ contains
     real(kind=r_def), parameter :: overall_tolerance = 1000.0_r_def
     real(kind=r_def) :: machine_tol, machine_tol_r_solver
     real(kind=r_def) :: relative_diff, relative_diff_r_solver
+    real(kind=r_def), parameter :: eps = 1e-30_r_def
     integer(tik)                :: id
 
     if ( LPROF ) call start_timing( id, 'adjt_pressure_precon_alg' )
@@ -189,7 +190,7 @@ contains
     write(log_scratch_space, *) "p inner product = ", p_inner_prod
     call log_event( log_scratch_space, LOG_LEVEL_DEBUG )
 
-    p_sf = 1.0_r_def / (p_inner_prod + EPS)
+    p_sf = 1.0_r_def / (p_inner_prod + eps)
 
     inner1 = 0.0_r_def
     inner1 = inner1 + p_inner_prod * p_sf
