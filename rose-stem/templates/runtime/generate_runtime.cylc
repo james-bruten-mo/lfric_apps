@@ -42,12 +42,7 @@
     {% set bin_dir = destination_dir~"/bin/"~build_segment %}
     {% set lib_dir = destination_dir~"/lib/"~build_segment %}
     {% set mod_dir = destination_dir~"/mod/"~build_segment %}
-    {% if task_ns.conf_name == "canned" %}
-        {% set mesh_dir = "$CYLC_TASK_WORK_DIR" %}
-    {% else %}
-        {% set mesh_dir = destination_dir~
-                          "/meshes" %}
-    {% endif %}
+    {% set mesh_dir = destination_dir~"/meshes" %}
     {% set task_output_dir = destination_dir~"/"~
                              task_ns.application~"/"~
                              task_family %}
@@ -84,6 +79,10 @@
     {% elif task_ns.application == "mesh" %}
 
         {% include "templates/runtime/generate_runtime_mesh.cylc" %}
+
+    {% elif task_values["app_name"] == "canned_test" %}
+
+        {% include "templates/runtime/generate_runtime_canned.cylc" %}
 
     {# If this becomes complex have the opportunity to split by application here #}
     {% elif task.startswith("run") %}

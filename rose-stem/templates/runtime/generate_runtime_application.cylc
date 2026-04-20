@@ -3,8 +3,6 @@
 {# The file LICENCE, distributed with this code, contains details of the terms #}
 {# under which the code may be used. #}
 {# ########################################################################### #}
-{% from "cylc.flow" import LOG %}
-
 {% do LOG.debug("Entered templates/runtime/generate_runtime_application.cylc") %}
 {# Generate the runtime section for application run tasks #}
 
@@ -23,22 +21,18 @@
 {% set script_str = namespace(name="") %}
 {% set script_str.name = "$CYLC_WORKFLOW_RUN_DIR/bin/application_results_setup.sh ; " %}
 {% set script_str.name = script_str.name~"rose task-run --app-key="~task_values["app_name"] %}
-{% if task_values["app_name"] == "canned_test" %}
-    {% set script_str.name = script_str.name~" --command-key=$RUN_METHOD" %}
-{% else %}
-    {% if task_ns.application != "lfricinputs" %}
-        {% set script_str.name = script_str.name~" --opt-conf-key="~task_values["resolution"] %}
-    {% endif %}
-    {% for opt_conf in task_values["opt_confs"] %}
-        {% if opt_conf.strip() %}
-            {% set script_str.name = script_str.name~" --opt-conf-key="~opt_conf %}
-        {% endif %}
-    {% endfor %}
-    {% if task_values["use_xios"] and task_values["app_name"]!='lfric_atm' %}
-        {% set script_str.name = script_str.name~" --opt-conf-key=xios_server" %}
-    {% endif %}
-    {% set script_str.name = script_str.name~" --opt-conf-key=suite_controlled" %}
+{% if task_ns.application != "lfricinputs" %}
+    {% set script_str.name = script_str.name~" --opt-conf-key="~task_values["resolution"] %}
 {% endif %}
+{% for opt_conf in task_values["opt_confs"] %}
+    {% if opt_conf.strip() %}
+        {% set script_str.name = script_str.name~" --opt-conf-key="~opt_conf %}
+    {% endif %}
+{% endfor %}
+{% if task_values["use_xios"] and task_values["app_name"]!='lfric_atm' %}
+    {% set script_str.name = script_str.name~" --opt-conf-key=xios_server" %}
+{% endif %}
+{% set script_str.name = script_str.name~" --opt-conf-key=suite_controlled" %}
 
 {% if task_ns.application == "lfric_coupled" %}
     {% set script_str.name = script_str.name~" --path=$CYLC_WORKFLOW_SHARE_DIR/fcm_make_drivers/extract/drivers/Coupled_Drivers" %}
@@ -59,9 +53,13 @@
                         "_weightgen_script" %}
 {% endif %}
 
-{# Set the pre-script command for canned tests #}
-{% set canned_prescript = "cp -r $SOURCE_DIRECTORY/"~task_values["example_dir"]~"/* "~
-                          "$CYLC_TASK_WORK_DIR" %}
+{# Check to see if it is a Perftools application run, as we need to change the binary target#}
+{% set PAT_EXE_EXTEN ='' %}
+{% if SITE~"-"~task_ns.platform == 'meto-ex1a' %}
+    {% if 'perftools' in task_ns.compiler %}
+        {% set PAT_EXE_EXTEN ='+pat' %}
+    {% endif %}
+{% endif %}
 
 {# Set the post script command - should be a list of strings #}
 {% set post_script_commands = [
@@ -81,14 +79,6 @@
     'test -f $CYLC_TASK_WORK_DIR/timer.txt && '~
         'cp $CYLC_TASK_WORK_DIR/timer.txt $TASK_OUTPUT_DIR || true'
     ] %}
-
-{# Check to see if it is a Perftools application run, as we need to change the binary target#}
-{% set PAT_EXE_EXTEN ='' %}
-{% if SITE~"-"~task_ns.platform == 'meto-ex1a' %}
-    {% if 'perftools' in task_ns.compiler %}
-        {% set PAT_EXE_EXTEN ='+pat' %}
-    {% endif %}
-{% endif %}
 
 {# Define the task runtime section #}
     [[{{task}}]]

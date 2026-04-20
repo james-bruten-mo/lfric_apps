@@ -1,0 +1,75 @@
+{# ########################################################################### #}
+{# (c) Crown copyright 2024 Met Office. All rights reserved. #}
+{# The file LICENCE, distributed with this code, contains details of the terms #}
+{# under which the code may be used. #}
+{# ########################################################################### #}
+{% do LOG.debug("Entered templates/runtime/generate_runtime_canned.cylc") %}
+{# Generate the runtime section for canned run tasks #}
+
+{% set mesh_dir = "$CYLC_TASK_WORK_DIR" %}
+
+{# Define a family for this task #}
+    [[{{task_family|upper}}]]
+        inherit={{task_ns.application|upper}}_{{task_ns.platform|upper}}
+
+{# Set the family inheritance for this task #}
+{% set inherit = namespace(str="") %}
+{% set inherit.str = task_family|upper %}
+{% for family in task_values["run_families"] %}
+    {% set inherit.str = inherit.str~","~family|upper %}
+{% endfor %}
+
+{% set script_str = namespace(name="") %}
+{% set script_str.name = "$CYLC_WORKFLOW_RUN_DIR/bin/application_results_setup.sh ; " %}
+{% set script_str.name = script_str.name~"rose task-run --app-key=canned_test" %}
+{% set script_str.name = script_str.name~" --command-key=$RUN_METHOD" %}
+
+{# Set the post script command - should be a list of strings #}
+{% set post_script_commands = [
+    '# Create results directory, if not already created.',
+    'mkdir -p $TASK_OUTPUT_DIR/results/',
+    'RELATIVE_LOG_ROOT=$(echo $CYLC_TASK_LOG_ROOT | sed "s|$HOME/||")',
+    'echo $RELATIVE_LOG_ROOT > $TASK_OUTPUT_DIR/run.log.path',
+    'find . -regex ".*PET0+\..+\.Log" -exec cp {} $ROSE_TASK_LOG_DIR \;',
+    'find . -regex ".*PET0+\..+\.Log" -exec cp {} $TASK_OUTPUT_DIR \;',
+    'ls -sh $TASK_OUTPUT_DIR/results > $ROSE_TASK_LOG_DIR/results_file_sizes.log',
+    'find . -name timer.txt -exec cp {} $ROSE_TASK_LOG_DIR \;',
+    'test -f '~task_values["app_name"]~
+        '-checksums.txt && cp $CYLC_TASK_WORK_DIR/'~
+        task_values["app_name"]~'-checksums.txt $TASK_OUTPUT_DIR/checksum.txt',
+    'touch $CYLC_TASK_WORK_DIR/tmp.m',
+    'mv $CYLC_TASK_WORK_DIR/*.m $TASK_OUTPUT_DIR/results',
+    'test -f $CYLC_TASK_WORK_DIR/timer.txt && '~
+        'cp $CYLC_TASK_WORK_DIR/timer.txt $TASK_OUTPUT_DIR || true'
+    ] %}
+
+
+{# Define the task runtime section #}
+    [[{{task}}]]
+        inherit={{inherit.str|upper}}
+        script = {{script_str.name}}
+        {{ generate_script("post-script", post_script_commands) }}
+        execution time limit = PT{{task_values["wallclock"]}}M
+        [[[environment]]]
+            DESTINATION_DIRECTORY   = {{destination_dir}}
+            APPS_ROOT_DIR           = $SOURCE_ROOT/lfric_apps
+            CORE_ROOT_DIR           = $SOURCE_ROOT/lfric_core
+            SOURCE_DIRECTORY        = $SOURCE_ROOT/{{task_values["application_dir"]}}
+            EXAMPLE_DIR             = {{task_values["example_dir"]}}
+            TASK_OUTPUT_DIR         = {{task_output_dir}}
+            APPLICATION             = {{task_ns.application}}
+            EXEC_NAME               = $APPLICATION
+            BIN_DIR                 = {{bin_dir}}
+            OMP_NUM_THREADS         = {{task_values["threads"]}}
+            TOTAL_RANKS             = {{task_values["mpi_parts"]}}
+            XIOS_SERVER_MODE        = {{task_values["xios_server_mode"]}}
+            XIOS_SERVER_RANKS       = {{task_values["xios_server_ranks"]}}
+            xios_nodes              = {{task_values["xios_nodes"]}}
+            mpi_parts_xios          = {{task_values["mpi_parts_xios"]}}
+            CORES_PER_NODE_OVERRIDE = {{task_values["task_ranks_per_node"]}}
+            RANKS_DEPTH_PAD         = {{task_values["task_ranks_depth_pad"]}}
+            LOG_SOLE_RANK           = {{task_values["log_to_rank_zero_only"]}}
+            METADATA                = $SOURCE_ROOT/lfric_apps/applications/lfric_atm/metadata
+
+
+{% do LOG.debug("Finished in templates/runtime/generate_runtime_canned.cylc") %}
