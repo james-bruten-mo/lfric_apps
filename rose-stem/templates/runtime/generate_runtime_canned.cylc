@@ -70,6 +70,7 @@
             RANKS_DEPTH_PAD         = {{task_values["task_ranks_depth_pad"]}}
             LOG_SOLE_RANK           = {{task_values["log_to_rank_zero_only"]}}
             METADATA                = $SOURCE_ROOT/lfric_apps/applications/lfric_atm/metadata
+            EXTRA_NAMELIST_FILES    = {{task_values["namelist_file"]}}
 
 
 {% do LOG.debug("Finished in templates/runtime/generate_runtime_canned.cylc") %}
