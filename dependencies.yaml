@@ -22,7 +22,7 @@ casim:
     ref: 2026.03.2
 
 jules:
-    source: cazld00001l:/var/tmp/persistent/working_copies/test_lfric_jules_meta/lfric_apps
+    source: cazld00001l:/var/tmp/persistent/working_copies/test_lfric_jules_meta/jules
     ref:
 
 lfric_apps:
