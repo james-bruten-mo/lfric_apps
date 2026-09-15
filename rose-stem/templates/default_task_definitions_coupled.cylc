@@ -5,28 +5,25 @@
 {# ########################################################################### #}
 {% do LOG.debug("Entered templates/default_task_definitions_coupled.cylc") %}
 
+{% set dt_hours = task_values["DT"] / 3600 %}
+{% set basis = task_values["expt_basis"].split(",") %}
+{% set basis_point = "%04d%02d%02dT%02d%02dZ" | format(basis[0]|int, basis[1]|int, basis[2]|int, basis[3]|int, basis[4]|int) %}
+{% do task_values.update("basis_point": basis_point) %}
+{% do task_values.update({"segment_offset": 0}) %}
+{% do task_values.update({"segment_length": task_values["DT"]}) %}
+{% do task_dict.update({"ocean_seaice_timesteps_per_day": 24 / dt_hours}) %}
+{% do task_dict.update({"ocean_seaice_seconds_per_timestep": 86400/task_dict["ocean_seaice_timesteps_per_day"]|int}) %}
+
 {% if "calendar" not in task_dict %}
     {% do task_dict.update({"calendar": "360day"}) %}
-{% endif %}
-
-{% if "datam" not in task_dict %}
-    {% do task_dict.update({"datam": "History_Data"}) %}
 {% endif %}
 
 {% if "diag_mean_period" not in task_dict %}
     {% do task_dict.update({"diag_mean_period": "1M"}) %}
 {% endif %}
 
-{% if "expt_basis" not in task_dict %}
-    {% do task_dict.update({"expt_basis": '1979,1,1,0,0'}) %}
-{% endif %}
-
 {% if "expt_calendar" not in task_dict %}
     {% do task_dict.update({"expt_calendar": "360day"}) %}
-{% endif %}
-
-{% if "expt_resub" not in task_dict %}
-    {% do task_dict.update({"expt_resub": "12H"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}
@@ -47,10 +44,7 @@
     {% do task_dict.update({"nemo_jproc": 18}) %}
 {% endif %}
 
-{% if "nemo_nproc" not in task_dict %}
-    {% do task_dict.update({"nemo_nproc": task_dict["nemo_iproc"] *
-                                          task_dict["nemo_jproc"]}) %}
-{% endif %}
+{% do task_dict.update({"nemo_nproc": task_dict["nemo_iproc"] * task_dict["nemo_jproc"]}) %}
 
 {% if "nemo_rst" not in task_dict %}
     {% do task_dict.update({"nemo_rst": task_dict["datam"]~"/NEMOhist"}) %}
@@ -73,14 +67,6 @@
 {# Caution: This default assumes running at the MO #}
 {% if "oceandir" not in task_dict %}
     {% do task_dict.update({"oceandir": "/common/internal/ocean"}) %}
-{% endif %}
-
-{% if "ocean_seaice_timesteps_per_day" not in task_dict %}
-    {% do task_dict.update({"ocean_seaice_timesteps_per_day": 48}) %}
-{% endif %}
-
-{% if "ocean_seaice_seconds_per_timestep" not in task_dict %}
-    {% do task_dict.update({"ocean_seaice_seconds_per_timestep": 86400/task_dict["ocean_seaice_timesteps_per_day"]|int}) %}
 {% endif %}
 
 {% if "ocean_threads" not in task_dict %}
@@ -113,6 +99,19 @@
 {# Caution: This default assumes running at the MO #}
 {% if "rivers_only_install_dir" not in task_dict %}
     {% do task_dict.update({"rivers_only_install_dir": "$BIG_DATA_DIR/ancils/basic-gc/Ticket2861/C48/n96e/orca025/rivers_trip/rivers_grid"}) %}
+{% endif %}
+
+{# Caution: This default assumes running at the MO #}
+{% if "river_start" not in task_dict %}
+    {% do task_dict.update({"river_start": "$BIG_DATA_DIR/ancils/basic-gc/Ticket147/C48/n96e/orca025/rivers/river_stor_zero_30424.nc"}) %}
+{% endif %}
+
+{% if "river_storage_ancil" not in task_dict %}
+    {% do task_dict.update({"river_storage_ancil": {{task_values["riv_number_ancillary"]}}~"/qrclim.rivstor.nc"}) %}
+{% endif %}
+
+{% if "river_rst" not in task_dict %}
+    {% do task_dict.update({"river_rst": "RIVERhist"}) %}
 {% endif %}
 
 {% if "river_nodes" not in task_dict %}

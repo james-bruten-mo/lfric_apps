@@ -1224,13 +1224,13 @@
         "kgo_checks": ["checksum"],
         "xios_nodes": 1,
         "mpi_parts_xios": 6,
-        "coupled": true,
         "wallclock": 10,
         "plot_str": "plot_map.py $NODAL_DATA_DIR/lfric_diagnostics.nc  $PLOT_DIR",
         "app_name": "lfric_atm_coupled",
         "xios_info_level": 1,
         "xios_print_file": ".true.",
-        "restart_write": ".true.",
+        "coupled": true,
+        "expt_basis": '1979,1,1,0,0',
     }) %}
 
 {% elif task_ns.conf_name == "clim_gc6-C48_MG" %}
@@ -1251,7 +1251,6 @@
         "app_name": "lfric_atm_coupled",
         "xios_info_level": 1,
         "xios_print_file": ".true.",
-        "restart_write": ".true.",
     }) %}
 
 {% elif task_ns.conf_name == "canned" %}
@@ -1287,7 +1286,6 @@
         "tsteps": 720,
         "wallclock": 60,
         "plot_str": "",
-        "restart_write": false,
     }) %}
 {% endif %}
 

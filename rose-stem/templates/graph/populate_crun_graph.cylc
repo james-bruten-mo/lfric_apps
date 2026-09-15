@@ -41,15 +41,27 @@
     {% if restart_no > 0 %}
         {% do crun_values.update({"prev_task": prev_task}) %}
         {% do crun_values.update({"restart_read": ".true."}) %}
+        {% if task_values["coupled"] %}
+            {% set segment_offset = (task_values["init_tstep"]|int - 1) * task_values["DT"]|int %}
+            {% set segment_length = (task_values["last_tstep"]|int - task_values["init_tstep"]|int + 1) * task_values["DT"]|int %}
+            {% do task_values.update({"segment_offset": "PT"~segment_offset"S"}) %}
+            {% do task_values.update({"segment_length": "PT"~segment_length~"S"}) %}
+            {% do crun_values.update({"continuation": "true"}) %}
+            {% do crun_values.update({"cnwp_sub_cycling": true}) %}
+            {% do crun_values.update({"river_start": "$(ls -1t $RIVER_DATA/*.dump.*.nc 2>/dev/null | head -n 1)"}) %}
+            {% do crun_values.update({"river_storage_ancil": ""}) %}
+        {% endif %}
     {% else %}
         {% do crun_values.update({"prev_task": ""}) %}
         {% do crun_values.update({"restart_read": ".false."}) %}
     {% endif %}
-    {% if restart_no == crun -1 %}
+
+    {% if restart_no == crun-1 %}
         {% do crun_values.update({"restart_write": ".false."}) %}
     {% else %}
         {% do crun_values.update({"restart_write": ".true."}) %}
     {% endif %}
+
     {% do tasks_to_run.update({crun_task: crun_values}) %}
 
 

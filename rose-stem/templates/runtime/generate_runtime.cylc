@@ -38,7 +38,7 @@
 
     {# Set directories for this task #}
     {% set destination_dir = "$OUTPUT_ROOT" %}
-    {% set checkpoint_dir = "$CYLC_WORKFLOW_SHARE_DIR/data" %}
+    {% set checkpoint_dir = "$CYLC_WORKFLOW_SHARE_DIR/"~task_family %}
     {% set bin_dir = destination_dir~"/bin/"~build_segment %}
     {% set lib_dir = destination_dir~"/lib/"~build_segment %}
     {% set mod_dir = destination_dir~"/mod/"~build_segment %}
