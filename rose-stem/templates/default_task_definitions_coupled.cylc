@@ -47,7 +47,7 @@
 {% do task_dict.update({"nemo_nproc": task_dict["nemo_iproc"] * task_dict["nemo_jproc"]}) %}
 
 {% if "nemo_rst" not in task_dict %}
-    {% do task_dict.update({"nemo_rst": task_dict["datam"]~"/NEMOhist"}) %}
+    {% do task_dict.update({"nemo_rst": "NEMOhist"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}
