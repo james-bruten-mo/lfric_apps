@@ -222,7 +222,7 @@
 {% endif %}
 
 {# If application is coupled read in default values specific to coupled runs #}
-{% if task_dict["coupled"] %}
+{% if task_dict["coupled"] and not task.startswith("build") %}
     {% include "templates/default_task_definitions_coupled.cylc" %}
 {% endif %}
 

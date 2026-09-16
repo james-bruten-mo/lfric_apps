@@ -5,6 +5,12 @@
 {# ########################################################################### #}
 {% do LOG.debug("Entered templates/runtime/coupled_task_environment.cylc") %}
 
+{% if "calendar" not in task_values %}
+    {% for item in task_values %}
+        {% do LOG.debug(item~":   "~task_values[item]) %}
+    {% endfor %}
+{% endif %}
+
 {# nemo/ocean environment variables #}
 
             CALENDAR = {{task_values["calendar"]}}
@@ -24,8 +30,8 @@
             NEMO_RST = {{checkpoint_dir}}/{{task_values["nemo_rst"]}}
             NEMO_START = {{task_values["nemo_start"]}}
             NEMO_VERSION = {{task_values["nemo_version"]}}
-            OCEAN_EXEC = $OCEAN_MAKE_DIR/build-ocean/bin/nemo-si3.exe
             OCEAN_MAKE_DIR = {{task_values["ocean_make_dir"]}}
+            OCEAN_EXEC = $OCEAN_MAKE_DIR/build-ocean/bin/nemo-si3.exe
             OCEAN_SEAICE_SECONDS_PER_TIMESTEP = {{task_values["ocean_seaice_seconds_per_timestep"]}}
             OCEAN_SEAICE_TIMESTEPS_PER_DAY = {{task_values["ocean_seaice_timesteps_per_day"]}}
             OCEANDIR = {{task_values["oceandir"]}}
@@ -43,8 +49,8 @@
 {# river environment variables #}
 
             GSWP2_INSTALL_DIR = {{task_values["gswp_install_dir"]}}
-            RIVER_EXEC = $RIVER_MAKE_DIR/build/bin/river.exe
             RIVER_MAKE_DIR = {{task_values["river_make_dir"]}}
+            RIVER_EXEC = $RIVER_MAKE_DIR/build/bin/river.exe
             RIV_NUMBER_ANCILLARY = {{task_values["riv_number_ancillary"]}}
             RIVER_DATA = {{checkpoint_dir}}/{{task_values["river_rst"]}}
             RIVER_NPROC = {{task_values["river_nproc"]}}

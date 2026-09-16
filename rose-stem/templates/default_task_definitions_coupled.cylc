@@ -4,14 +4,15 @@
 {# under which the code may be used. #}
 {# ########################################################################### #}
 {% do LOG.debug("Entered templates/default_task_definitions_coupled.cylc") %}
+{% do LOG.debug("Task: "~task) %}
 
-{% set dt_hours = task_values["DT"] / 3600 %}
-{% set basis = task_values["expt_basis"].split(",") %}
+{% set dt_hours = task_dict["DT"] / 3600 %}
+{% set basis = task_dict["expt_basis"].split(",") %}
 {% set basis_point = "%04d%02d%02dT%02d%02dZ" | format(basis[0]|int, basis[1]|int, basis[2]|int, basis[3]|int, basis[4]|int) %}
-{% do task_values.update("basis_point": basis_point) %}
-{% do task_values.update({"segment_offset": 0}) %}
-{% do task_values.update({"segment_length": task_values["DT"]}) %}
-{% do task_dict.update({"ocean_seaice_timesteps_per_day": 24 / dt_hours}) %}
+{% do task_dict.update({"basis_point": basis_point}) %}
+{% do task_dict.update({"segment_offset": 0}) %}
+{% do task_dict.update({"segment_length": task_dict["DT"]}) %}
+{% do task_dict.update({"ocean_seaice_timesteps_per_day": (24 / dt_hours)|int}) %}
 {% do task_dict.update({"ocean_seaice_seconds_per_timestep": 86400/task_dict["ocean_seaice_timesteps_per_day"]|int}) %}
 
 {% if "calendar" not in task_dict %}
@@ -106,8 +107,13 @@
     {% do task_dict.update({"river_start": "$BIG_DATA_DIR/ancils/basic-gc/Ticket147/C48/n96e/orca025/rivers/river_stor_zero_30424.nc"}) %}
 {% endif %}
 
+{# Caution: This default assumes running at the MO #}
+{% if "riv_number_ancillary" not in task_dict %}
+    {% do task_dict.update({"riv_number_ancillary": "$BIG_DATA_DIR/ancils/basic-gc/Ticket147/C48/n96e/orca025/remapping_weights"}) %}
+{% endif %}
+
 {% if "river_storage_ancil" not in task_dict %}
-    {% do task_dict.update({"river_storage_ancil": {{task_values["riv_number_ancillary"]}}~"/qrclim.rivstor.nc"}) %}
+    {% do task_dict.update({"river_storage_ancil": task_dict["riv_number_ancillary"]~"/qrclim.rivstor.nc"}) %}
 {% endif %}
 
 {% if "river_rst" not in task_dict %}
@@ -131,11 +137,6 @@
                                               "fcm_make_lfric_atm_river_"~
                                               task_ns.platform~"_"~
                                               task_dict["build_conf"]}) %}
-{% endif %}
-
-{# Caution: This default assumes running at the MO #}
-{% if "riv_number_ancillary" not in task_dict %}
-    {% do task_dict.update({"riv_number_ancillary": "$BIG_DATA_DIR/ancils/basic-gc/Ticket147/C48/n96e/orca025/remapping_weights"}) %}
 {% endif %}
 
 {# Caution: This default assumes running at the MO #}
