@@ -36,7 +36,7 @@
             OCEAN_SEAICE_TIMESTEPS_PER_DAY = {{task_values["ocean_seaice_timesteps_per_day"]}}
             OCEANDIR = {{task_values["oceandir"]}}
             PREVIOUS_CYCLE =
-            SECONDS_PER_TIMESTEP = {{task_values["ocean_seaice_seconds_per_timestep"]}}
+            SECONDS_PER_TIMESTEP = {{task_values["ocean_seaice_timesteps_per_day"]}}
             SI3_START = {{task_values["si3_start"]}}
             TASK_START_POINT = $(isodatetime {{task_values["basis_point"]}} --calendar={{task_values["expt_calendar"]}} --offset='PT{{task_values["segment_offset"]}}S' --print-format CCYYMMDDThhmmZ)
             TASKEND = $(isodatetime $TASK_START_POINT $TASK_START_POINT --calendar={{task_values["expt_calendar"]}} --offset='PT{{task_values["segment_length"]}}S' --print-format y,m,d,h,M,s)

@@ -10,10 +10,16 @@
 {% set basis = task_dict["expt_basis"].split(",") %}
 {% set basis_point = "%04d%02d%02dT%02d%02dZ" | format(basis[0]|int, basis[1]|int, basis[2]|int, basis[3]|int, basis[4]|int) %}
 {% do task_dict.update({"basis_point": basis_point}) %}
-{% do task_dict.update({"segment_offset": 0}) %}
-{% do task_dict.update({"segment_length": task_dict["DT"]}) %}
 {% do task_dict.update({"ocean_seaice_timesteps_per_day": (24 / dt_hours)|int}) %}
 {% do task_dict.update({"ocean_seaice_seconds_per_timestep": 86400/task_dict["ocean_seaice_timesteps_per_day"]|int}) %}
+
+{% if "segment_offset" not in task_dict %}
+    {% do task_dict.update({"segment_offset": 0}) %}
+{% endif %}
+
+{% if "segment_length" not in task_dict %}
+    {% do task_dict.update({"segment_length": task_dict["DT"] * task_dict["tsteps"]}) %}
+{% endif %}
 
 {% if "calendar" not in task_dict %}
     {% do task_dict.update({"calendar": "360day"}) %}
