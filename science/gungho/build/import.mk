@@ -3,14 +3,14 @@
 # The file LICENCE, distributed with this code, contains details of the terms
 # under which the code may be used.
 ##############################################################################
-gungho_source = $(APPS_ROOT_DIR)/science/gungho/source
+export PROJECT_SOURCE = $(APPS_ROOT_DIR)/science/gungho/source
 
 .PHONY: import-gungho
 import-gungho:
 	$Q$(MAKE) $(QUIET_ARG) -f $(LFRIC_BUILD)/extract.mk \
-	          SOURCE_DIR=$(gungho_source)
+			  SOURCE_DIR=$(PROJECT_SOURCE)
 	$Q$(MAKE) $(QUIET_ARG) -f $(LFRIC_BUILD)/extract.mk \
 	          SOURCE_DIR=$(APPS_ROOT_DIR)/science/shared/source
 	$Q$(MAKE) $(QUIET_ARG) -f $(LFRIC_BUILD)/psyclone/psyclone_psykal.mk \
-	          SOURCE_DIR=$(gungho_source) \
+	          SOURCE_DIR=$(PROJECT_SOURCE) \
 	          OPTIMISATION_PATH=$(OPTIMISATION_PATH)

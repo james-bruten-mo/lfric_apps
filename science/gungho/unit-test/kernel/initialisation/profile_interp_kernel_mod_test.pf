@@ -13,10 +13,7 @@ use, intrinsic :: iso_fortran_env, only: real64
 use profile_interp_kernel_mod,     only: profile_size,   &
                                          profile_data,   &
                                          profile_heights
-use funit,                         only: TestCase,      &
-                                         anyexceptions, &
-                                         assertequal,   &
-                                         sourcelocation
+use funit
 
 implicit none
 
